@@ -303,3 +303,32 @@
     margin-left: 0;
   }
 }
+
+.practice-loading {
+  padding: 28px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-lg);
+  color: var(--prem-text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.practice-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.pagination-btn {
+  min-width: 104px;
+}
+
+.pagination-info {
+  color: var(--prem-text-muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}

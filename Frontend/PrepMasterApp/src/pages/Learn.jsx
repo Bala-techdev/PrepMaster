@@ -9,7 +9,7 @@ import {
   Star,
 } from 'lucide-react'
 import ProgressBar from '../components/ProgressBar'
-import { useAppState } from '../state/appContext'
+import { useAppData } from '../state/useAppData'
 import './Learn.css'
 
 const iconMap = {
@@ -26,37 +26,8 @@ const badgeTone = {
 }
 
 export default function LearnPage() {
-  const { categories, stats } = useAppState()
-
-  const completionBadges = [
-    {
-      id: 'first-task',
-      title: 'First task completed',
-      earned: stats.tasksCompleted > 0,
-    },
-    {
-      id: 'problem-solver',
-      title: 'Problem marked solved',
-      earned: stats.solvedCount > 0,
-    },
-    {
-      id: 'lesson-learner',
-      title: 'Lesson completed',
-      earned: stats.lessonsDone > 0,
-    },
-    {
-      id: 'week-streak',
-      title: 'Seven-day streak',
-      earned: stats.currentStreak >= 7,
-    },
-    {
-      id: 'mock-complete',
-      title: 'Mock interview completed',
-      earned: stats.interviewCount > 0,
-    },
-  ]
-
-  const earnedBadges = completionBadges.filter((badge) => badge.earned).length
+  const { categories, achievements, stats } = useAppData()
+  const earnedBadges = achievements.filter((badge) => badge.earned).length
 
   return (
     <section className="learn-page">
@@ -66,13 +37,13 @@ export default function LearnPage() {
             <p className="page-eyebrow">Curriculum</p>
             <h1 className="page-title">Learn</h1>
             <p className="page-subtitle">
-              Master the concepts you need to succeed, one focused lesson at a
-              time.
+              Work through backend topics, open the reference material, then
+              practise the linked questions.
             </p>
           </div>
           <p className="section-count">
-            <strong>{stats.lessonsDone}</strong> of {stats.totalLessons} lessons
-            completed
+            <strong>{stats.solvedCount}</strong> of {stats.totalQuestions}{' '}
+            questions solved
           </p>
         </header>
 
@@ -122,7 +93,7 @@ export default function LearnPage() {
                   <div className="category-meta">
                     <span>{category.level}</span>
                     <span>
-                      {category.completedCount}/{category.total} lessons
+                      {category.completedCount}/{category.total} questions solved
                     </span>
                   </div>
 
@@ -153,20 +124,21 @@ export default function LearnPage() {
               Earned badges
             </h2>
             <span className="section-count">
-              {earnedBadges} of {completionBadges.length} earned
+              {earnedBadges} of {achievements.length} earned
             </span>
           </div>
 
           <div className="badges-grid">
-            {completionBadges.map((badge) => (
+            {achievements.map((badge) => (
               <div
                 key={badge.id}
                 className={`badge-card ${badge.earned ? 'earned' : 'pending'}`}
+                title={badge.description}
               >
                 <span className="badge-icon" aria-hidden="true">
                   <Star size={17} />
                 </span>
-                <span className="badge-title">{badge.title}</span>
+                <span className="badge-title">{badge.name}</span>
                 <span className="badge-state" aria-hidden="true">
                   {badge.earned ? (
                     <CheckCircle size={16} />
@@ -182,9 +154,9 @@ export default function LearnPage() {
           </div>
 
           <p className="learn-note">
-            Badges are derived from completed tasks, marked problems, finished
-            lessons and mock interviews in this browser. Lesson content is
-            sample material.
+            Badges are derived from backend-recorded tasks, XP and activity
+            days. Standalone lesson completion is not supported because the
+            backend stores questions and resources rather than lessons.
           </p>
         </section>
       </div>

@@ -16,7 +16,6 @@ import com.prepMaster.codingPlatfom.exception.ResourceNotFoundException;
 import com.prepMaster.codingPlatfom.mapper.UserMapper;
 import com.prepMaster.codingPlatfom.repository.UserRepository;
 import com.prepMaster.codingPlatfom.util.TextNormalizer;
-import com.prepMaster.codingPlatfom.exception.ResourceNotFoundException;
 
 @Service
 @Transactional

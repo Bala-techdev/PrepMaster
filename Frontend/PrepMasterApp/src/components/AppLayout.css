@@ -498,3 +498,45 @@
   border-color: var(--prem-border-strong);
   background: var(--prem-card);
 }
+
+/* ---------- Session and data states ---------- */
+
+.logout-link {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.logout-link:hover {
+  color: var(--prem-red);
+}
+
+.app-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: var(--prem-gap);
+  padding: 11px 14px;
+  background: var(--prem-red-soft);
+  border: 1px solid color-mix(in srgb, var(--prem-red) 28%, var(--prem-border));
+  border-radius: var(--prem-radius-sm);
+  color: var(--prem-red);
+  font-size: 0.8rem;
+  font-weight: 550;
+  line-height: 1.5;
+}
+
+.app-error-retry {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--prem-red);
+  font: inherit;
+  font-weight: 750;
+  text-decoration: underline;
+}
+

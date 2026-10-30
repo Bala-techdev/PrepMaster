@@ -4,51 +4,42 @@ import { ArrowUpRight, BookOpen, CheckCircle, Info, Lock } from 'lucide-react'
 import TaskCard from '../components/TaskCard'
 import ProgressBar from '../components/ProgressBar'
 import Modal from '../components/Modal'
-import { useAppState } from '../state/appContext'
-import { LEARNING_CATEGORIES } from '../data/lessons'
+import { useAppData } from '../state/useAppData'
 import './DailyPlan.css'
 
-function getLessonCategoryId(lessonId) {
-  return (
-    LEARNING_CATEGORIES.find((category) =>
-      category.lessons.some((lesson) => lesson.id === lessonId),
-    )?.id || null
-  )
-}
-
 export default function DailyPlan() {
-  const { dailyTasks, stats, completeTask } = useAppState()
+  const { tasks, stats, completeTask, completingTaskId } = useAppData()
   const [revisitTask, setRevisitTask] = useState(null)
   const [feedback, setFeedback] = useState(null)
 
-  const remaining = stats.totalTasks - stats.completedCount
+  const remaining = Math.max(0, stats.totalTasks - stats.completedCount)
+  const busy = Boolean(completingTaskId)
 
-  const handleComplete = (task) => {
-    const result = completeTask(task.id)
+  const handleComplete = async (task) => {
+    setFeedback(null)
+    const result = await completeTask(task.id)
 
     if (result.ok) {
-      const isLastTask = task.id === 5
+      const isLastTask = stats.completedCount + 1 >= stats.totalTasks
+      const xp = result.completion?.xpAwarded
       setFeedback({
         tone: 'success',
         message: isLastTask
-          ? `${task.title} completed. That was the final task — today's plan is complete.`
-          : `${task.title} completed. The next task is now unlocked.`,
+          ? `${task.title} completed. That was the final task — today's plan is complete.${xp ? ` +${xp} XP awarded.` : ''}`
+          : `${task.title} completed.${xp ? ` +${xp} XP awarded.` : ''} The next task is now unlocked.`,
       })
-      return
-    }
-
-    if (result.reason === 'locked') {
-      setFeedback({
-        tone: 'error',
-        message:
-          'That task is still locked. Complete the previous task before marking this one complete.',
-      })
+      if (result.warning) {
+        setFeedback((current) => ({
+          tone: 'error',
+          message: `${current.message} ${result.warning}`,
+        }))
+      }
       return
     }
 
     setFeedback({
       tone: 'error',
-      message: 'This task could not be marked complete. Please try again.',
+      message: result.message || 'This task could not be marked complete. Please try again.',
     })
   }
 
@@ -60,8 +51,8 @@ export default function DailyPlan() {
             <p className="page-eyebrow">Today</p>
             <h1 className="page-title">Daily Plan</h1>
             <p className="page-subtitle">
-              Complete tasks in order — each one unlocks the next. Progress
-              resets at local midnight.
+              Complete tasks in order — each one unlocks the next. Progress is
+              saved to your account and resets at midnight in your plan timezone.
             </p>
           </div>
 
@@ -90,25 +81,26 @@ export default function DailyPlan() {
           </p>
         )}
 
-        {remaining === 0 && (
+        {stats.totalTasks > 0 && remaining === 0 && (
           <p className="plan-status is-success" role="status">
             <CheckCircle size={16} aria-hidden="true" />
-            All five tasks are complete. Your dashboard, streak and progress
-            have been updated.
+            All {stats.totalTasks} tasks are complete. Your dashboard, streak and
+            progress have been updated by the backend.
           </p>
         )}
 
         <div className="daily-tasks">
-          {dailyTasks.map((task) => (
+          {tasks.map((task) => (
             <TaskCard
               key={task.id}
-              number={task.id}
+              number={task.order}
               title={task.title}
               category={task.category}
               difficulty={task.difficulty}
-              estimatedTime={task.estimatedTime}
+              xpReward={task.xpReward}
               isCompleted={task.isCompleted}
               isLocked={task.isLocked}
+              isBusy={completingTaskId === task.id}
               onToggle={() => handleComplete(task)}
               onRevisit={() => setRevisitTask(task)}
             />
@@ -118,9 +110,10 @@ export default function DailyPlan() {
         <p className="unlock-explanation" role="note">
           <strong>How unlocking works:</strong> tasks unlock sequentially —
           complete the previous task to unlock the next one. Tasks cannot be
-          skipped, and a locked task never has a completion control. Locked or
-          completed tasks can always be reviewed. {stats.completedCount} of{' '}
+          skipped, and a locked task never has a completion control. Completed
+          tasks can always be reviewed. {stats.completedCount} of{' '}
           {stats.totalTasks} completed today.
+          {busy && ' Saving your completion…'}
         </p>
       </div>
 
@@ -129,28 +122,30 @@ export default function DailyPlan() {
         title={revisitTask ? revisitTask.title : 'Task details'}
         description={
           revisitTask
-            ? `${revisitTask.category} · ${revisitTask.estimatedTime} · ${revisitTask.difficulty}`
+            ? `${revisitTask.category} · ${revisitTask.difficulty} · ${revisitTask.xpReward} XP`
             : undefined
         }
         onClose={() => setRevisitTask(null)}
         footer={
           revisitTask ? (
             <>
+              {revisitTask.questionId && (
+                <Link
+                  to={`/practice/${revisitTask.questionId}`}
+                  className="btn btn-primary"
+                  onClick={() => setRevisitTask(null)}
+                >
+                  Open practice view
+                  <ArrowUpRight size={15} aria-hidden="true" />
+                </Link>
+              )}
               <Link
-                to={`/practice/${revisitTask.practiceId}`}
-                className="btn btn-primary"
-                onClick={() => setRevisitTask(null)}
-              >
-                Open practice view
-                <ArrowUpRight size={15} aria-hidden="true" />
-              </Link>
-              <Link
-                to={`/learn/${getLessonCategoryId(revisitTask.lessonId)}/${revisitTask.lessonId}`}
+                to={`/learn/${revisitTask.categoryId}`}
                 className="btn btn-secondary"
                 onClick={() => setRevisitTask(null)}
               >
                 <BookOpen size={15} aria-hidden="true" />
-                Review lesson
+                Review track
               </Link>
             </>
           ) : null
@@ -158,15 +153,22 @@ export default function DailyPlan() {
       >
         {revisitTask && (
           <div className="task-detail">
-            <p>{revisitTask.description}</p>
+            <p>
+              This task is part of today&apos;s backend-generated plan for{' '}
+              <strong>{revisitTask.category}</strong>. Open the practice view to
+              read the full prompt and reference material.
+            </p>
             <div className="task-detail-block">
-              <h3>Objective</h3>
-              <p>{revisitTask.objective}</p>
+              <h3>Recorded reward</h3>
+              <p>
+                Completing this task awards {revisitTask.xpReward} XP and records
+                the question as solved in your progress history.
+              </p>
             </div>
             <p className="task-detail-meta">
               <Lock size={14} aria-hidden="true" />
-              This task is completed for today. Revisit the material as often
-              as you like — completion is already recorded.
+              This task is completed for today. Completion is already recorded,
+              so revisiting it will not award XP twice.
             </p>
           </div>
         )}

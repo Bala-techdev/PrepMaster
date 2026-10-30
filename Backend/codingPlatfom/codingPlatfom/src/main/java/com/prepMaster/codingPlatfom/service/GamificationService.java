@@ -17,9 +17,13 @@ public class GamificationService {
 	private final TaskCompletionRepository completions; private final UserProgressRepository progress;
 	private final UserActivityRepository activity; private final UserService users; private final DailyPlanService plans;
 	private final UserStreakService streaks;
+	private final LearningCategoryRepository categories;
+	private final DSAQuestionRepository questions;
 	public GamificationService(TaskCompletionRepository completions, UserProgressRepository progress, UserActivityRepository activity,
-			UserService users, DailyPlanService plans, UserStreakService streaks, DailyPlanRepository plansForUser) {
+			UserService users, DailyPlanService plans, UserStreakService streaks, DailyPlanRepository plansForUser,
+			LearningCategoryRepository categories, DSAQuestionRepository questions) {
 		this.completions = completions; this.progress = progress; this.activity = activity; this.users = users; this.plans = plans; this.streaks = streaks; this.plansForUser = plansForUser;
+		this.categories = categories; this.questions = questions;
 	}
 	public Completion complete(Long userId, Long taskId) {
 		TaskCompletion prior = completions.findByUserIdAndTaskId(userId, taskId).orElse(null);
@@ -60,10 +64,22 @@ public class GamificationService {
 	}
 	@Transactional(readOnly = true)
 	public List<CategoryProgress> categoryProgress(Long userId) {
+		Map<Long, Long> completedByCategory = completions.findByUserIdOrderByCompletedAtDesc(userId).stream()
+				.collect(Collectors.groupingBy(c -> c.getTask().getCategory().getId(), Collectors.counting()));
+		return categories.findByActiveTrueOrderByNameAsc().stream()
+				.map(c -> new CategoryProgress(c.getId(), c.getName(), completedByCategory.getOrDefault(c.getId(), 0L),
+						questions.countByTopicCategoryIdAndActiveTrue(c.getId())))
+				.toList();
+	}
+	@Transactional(readOnly = true)
+	public List<SolvedQuestion> solvedQuestions(Long userId) {
 		return completions.findByUserIdOrderByCompletedAtDesc(userId).stream()
-				.collect(Collectors.groupingBy(c -> c.getTask().getCategory().getId(), Collectors.toList()))
-				.entrySet().stream().map(e -> new CategoryProgress(e.getKey(),
-						e.getValue().get(0).getTask().getCategory().getName(), e.getValue().size())).toList();
+				.filter(c -> c.getTask().getQuestion() != null)
+				.map(c -> {
+					DSAQuestion q = c.getTask().getQuestion();
+					return new SolvedQuestion(q.getId(), q.getTitle(), q.getDifficulty(), c.getCompletedAt());
+				})
+				.toList();
 	}
 	private List<DailyPlan> userPlans(Long userId) { return plansForUser.findByUserId(userId); }
 	private final DailyPlanRepository plansForUser;

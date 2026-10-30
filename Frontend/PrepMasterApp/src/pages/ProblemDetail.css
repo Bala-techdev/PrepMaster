@@ -67,6 +67,36 @@
   line-height: 1.7;
 }
 
+.problem-preline,
+.problem-example-text {
+  white-space: pre-line;
+}
+
+.problem-example-text {
+  color: var(--prem-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.problem-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.problem-tags li {
+  padding: 5px 11px;
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-pill);
+  background: var(--prem-light);
+  color: var(--prem-text-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
 .problem-detail-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

@@ -32,11 +32,20 @@ public class LearningContentService {
 	public void deleteCategory(Long id) { categoryEntity(id).deactivate(); }
 	public Topic createTopic(TopicRequest r) { return topic(topics.save(new LearningTopic(categoryEntity(r.categoryId()), r.name().trim(), r.slug().trim(), r.description()))); }
 	public List<Topic> topics(Long categoryId) { return topics.findByCategoryIdAndActiveTrueOrderByNameAsc(categoryId).stream().map(this::topic).toList(); }
+	public List<Topic> allTopics() { return topics.findByActiveTrueOrderByNameAsc().stream().map(this::topic).toList(); }
 	public Resource createResource(ResourceRequest r) { return resource(resources.save(new LearningResource(topicEntity(r.topicId()), r.title(), r.description(), r.resourceUrl()))); }
 	public List<Resource> resources(Long topicId) { return resources.findByTopicIdAndActiveTrueOrderByTitleAsc(topicId).stream().map(this::resource).toList(); }
 	public Tag createTag(TagRequest r) { return tag(tags.save(new QuestionTag(r.name().trim(), r.slug().trim()))); }
 	public Page<Question> questions(Difficulty difficulty, Long topicId, Pageable pageable) {
-		return questions.search(difficulty, topicId, pageable).map(this::question);
+		return questions(difficulty, topicId, null, pageable);
+	}
+	public Page<Question> questions(Difficulty difficulty, Long topicId, String search, Pageable pageable) {
+		String normalizedSearch = search == null || search.isBlank() ? null : search.trim();
+		return questions.search(difficulty, topicId, normalizedSearch, pageable).map(this::question);
+	}
+	public Question question(Long id) {
+		return question(questions.findByIdAndActiveTrue(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Question not found: " + id)));
 	}
 	public Question createQuestion(QuestionRequest r) {
 		Set<QuestionTag> selected = r.tagIds() == null ? Set.of() : Set.copyOf(tags.findByIdIn(r.tagIds()));

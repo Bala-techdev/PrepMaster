@@ -1,4 +1,4 @@
-import { Check, Lock, RotateCcw, Timer } from 'lucide-react'
+import { Check, Lock, RotateCcw, Zap } from 'lucide-react'
 import './TaskCard.css'
 
 export default function TaskCard({
@@ -6,9 +6,10 @@ export default function TaskCard({
   title,
   category,
   difficulty = 'Medium',
-  estimatedTime,
+  xpReward = 0,
   isCompleted,
   isLocked,
+  isBusy = false,
   onToggle,
   onRevisit,
 }) {
@@ -19,7 +20,7 @@ export default function TaskCard({
       : 'is-open'
 
   return (
-    <article className={`task-card ${stateClass}`}>
+    <article className={`task-card ${stateClass}`} aria-busy={isBusy}>
       <span className="task-number" aria-hidden="true">
         {number}
       </span>
@@ -47,8 +48,8 @@ export default function TaskCard({
         <div className="task-meta">
           <span className="task-category">{category}</span>
           <span className="task-time">
-            <Timer size={13} aria-hidden="true" />
-            {estimatedTime}
+            <Zap size={13} aria-hidden="true" />
+            {xpReward} XP
           </span>
         </div>
       </div>
@@ -82,9 +83,10 @@ export default function TaskCard({
             type="button"
             className="btn btn-primary task-start-btn"
             onClick={() => onToggle && onToggle()}
+            disabled={isBusy}
             aria-label={`Mark ${title} as completed`}
           >
-            Mark complete
+            {isBusy ? 'Saving…' : 'Mark complete'}
           </button>
         )}
       </div>

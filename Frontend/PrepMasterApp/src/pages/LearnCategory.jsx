@@ -2,13 +2,13 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, BookOpen, CheckCircle } from 'lucide-react'
 import EmptyState from '../components/EmptyState'
 import ProgressBar from '../components/ProgressBar'
-import { useAppState } from '../state/appContext'
+import { useAppData } from '../state/useAppData'
 import './LearnDetail.css'
 
 export default function LearnCategory() {
   const { categoryId } = useParams()
-  const { categories, completedLessons } = useAppState()
-  const category = categories.find((item) => item.id === categoryId)
+  const { categories } = useAppData()
+  const category = categories.find((item) => String(item.id) === categoryId)
 
   if (!category) {
     return (
@@ -16,7 +16,7 @@ export default function LearnCategory() {
         <div className="page-container">
           <EmptyState
             title="Learning track not found"
-            description="This track does not exist. Return to Learn to choose one of the four available tracks."
+            description="This track does not exist in the backend catalog. Return to Learn to choose another track."
           >
             <Link to="/learn" className="btn btn-primary">
               Back to Learn
@@ -26,8 +26,6 @@ export default function LearnCategory() {
       </section>
     )
   }
-
-  const completed = new Set(completedLessons)
 
   return (
     <section className="learn-detail-page">
@@ -40,13 +38,13 @@ export default function LearnCategory() {
         <header className="page-head">
           <div>
             <p className="page-eyebrow">Learning track</p>
-            <h1 className="page-title">{category.title}</h1>
+            <h1 className="page-title">{category.name}</h1>
             <p className="page-subtitle">{category.description}</p>
           </div>
           <div className="category-summary">
             <span className="category-badge progress">{category.level}</span>
             <span className="category-summary-count">
-              {category.completedCount}/{category.total} lessons
+              {category.completedCount}/{category.total} questions solved
             </span>
             <ProgressBar
               label="Track progress"
@@ -58,57 +56,68 @@ export default function LearnCategory() {
 
         <p className="learn-detail-note" role="note">
           <BookOpen size={15} aria-hidden="true" />
-          Sample lesson content. Completion is stored only in this browser; no
-          account or backend is connected.
+          Topics, resources and questions come from the backend. A question is
+          marked solved only when a daily-plan task containing it is completed.
         </p>
 
-        <div className="lesson-list">
-          {category.lessons.map((lesson, index) => {
-            const isCompleted = completed.has(lesson.id)
+        {category.topics.length === 0 ? (
+          <EmptyState
+            title="No topics in this track"
+            description="The backend has not published any active topics for this category yet."
+          />
+        ) : (
+          <div className="lesson-list">
+            {category.topics.map((topic, index) => {
+              const isCompleted =
+                topic.questionCount > 0 && topic.solvedCount === topic.questionCount
 
-            return (
-              <article
-                key={lesson.id}
-                className={`lesson-card${isCompleted ? ' is-completed' : ''}`}
-              >
-                <span className="lesson-number" aria-hidden="true">
-                  {index + 1}
-                </span>
-                <div className="lesson-main">
-                  <div className="lesson-title-row">
-                    <h2 className="lesson-title">
-                      <Link
-                        to={`/learn/${category.id}/${lesson.id}`}
-                        className="lesson-title-link"
-                      >
-                        {lesson.title}
-                      </Link>
-                    </h2>
-                    {isCompleted && (
-                      <span className="lesson-done-badge">
-                        <CheckCircle size={12} aria-hidden="true" />
-                        Completed
-                      </span>
-                    )}
-                  </div>
-                  <p className="lesson-description">{lesson.description}</p>
-                  <div className="lesson-meta">
-                    <span>{lesson.level}</span>
-                    <span>{lesson.duration}</span>
-                    <span>{lesson.topic}</span>
-                  </div>
-                </div>
-                <Link
-                  to={`/learn/${category.id}/${lesson.id}`}
-                  className="btn btn-secondary lesson-open-btn"
+              return (
+                <article
+                  key={topic.id}
+                  className={`lesson-card${isCompleted ? ' is-completed' : ''}`}
                 >
-                  {isCompleted ? 'Review' : 'Open lesson'}
-                  <ArrowRight size={14} aria-hidden="true" />
-                </Link>
-              </article>
-            )
-          })}
-        </div>
+                  <span className="lesson-number" aria-hidden="true">
+                    {index + 1}
+                  </span>
+                  <div className="lesson-main">
+                    <div className="lesson-title-row">
+                      <h2 className="lesson-title">
+                        <Link
+                          to={`/learn/${category.id}/${topic.id}`}
+                          className="lesson-title-link"
+                        >
+                          {topic.name}
+                        </Link>
+                      </h2>
+                      {isCompleted && (
+                        <span className="lesson-done-badge">
+                          <CheckCircle size={12} aria-hidden="true" />
+                          All questions solved
+                        </span>
+                      )}
+                    </div>
+                    <p className="lesson-description">{topic.description}</p>
+                    <div className="lesson-meta">
+                      <span>
+                        {topic.questionCount} question
+                        {topic.questionCount === 1 ? '' : 's'}
+                      </span>
+                      <span>{topic.solvedCount} solved</span>
+                      <span>{topic.categoryName}</span>
+                    </div>
+                  </div>
+                  <Link
+                    to={`/learn/${category.id}/${topic.id}`}
+                    className="btn btn-secondary lesson-open-btn"
+                  >
+                    {topic.solvedCount > 0 ? 'Review topic' : 'Open topic'}
+                    <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </article>
+              )
+            })}
+          </div>
+        )}
       </div>
     </section>
   )
