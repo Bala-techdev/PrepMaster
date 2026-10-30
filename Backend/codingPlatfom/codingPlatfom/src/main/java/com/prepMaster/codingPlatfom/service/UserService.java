@@ -16,6 +16,7 @@ import com.prepMaster.codingPlatfom.exception.ResourceNotFoundException;
 import com.prepMaster.codingPlatfom.mapper.UserMapper;
 import com.prepMaster.codingPlatfom.repository.UserRepository;
 import com.prepMaster.codingPlatfom.util.TextNormalizer;
+import com.prepMaster.codingPlatfom.exception.ResourceNotFoundException;
 
 @Service
 @Transactional
@@ -83,6 +84,12 @@ public class UserService {
 	public UserResponse getByEmail(String email) {
 		return UserMapper.toResponse(userRepository.findByEmailIgnoreCase(normalizeEmail(email))
 				.orElseThrow(() -> new ResourceNotFoundException("User not found for email: " + email)));
+	}
+
+	@Transactional(readOnly = true)
+	public User require(Long id) {
+		return userRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found: " + id));
 	}
 
 	private static String normalizeEmail(String email) {
