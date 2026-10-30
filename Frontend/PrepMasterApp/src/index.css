@@ -1,0 +1,404 @@
+/* =========================================================
+   PREPMASTER — GLOBAL DESIGN SYSTEM
+   Single source of truth for tokens, reset and base typography.
+   Imported once from main.jsx.
+========================================================= */
+
+:root,
+[data-theme="light"] {
+  /* Surfaces */
+  --prem-bg: #f4f6fc;
+  --prem-card: #ffffff;
+  --prem-light: #f1f4fb;
+
+  /* Lines */
+  --prem-border: #e4e9f3;
+  --prem-border-strong: #d3dbea;
+
+  /* Text */
+  --prem-text: #16203a;
+  --prem-text-muted: #5d6980;
+
+  /* Brand */
+  --prem-blue: #3563e8;
+  --prem-blue-strong: #2a4fc4;
+  --prem-blue-soft: rgba(53, 99, 232, 0.1);
+  --prem-indigo: #4f46e5;
+  --prem-purple: #7c4ddb;
+  --prem-purple-soft: rgba(124, 77, 219, 0.1);
+
+  /* Semantic */
+  --prem-green: #0a7d5a;
+  --prem-green-soft: rgba(10, 125, 90, 0.1);
+  --prem-amber: #a85a06;
+  --prem-amber-soft: rgba(168, 90, 6, 0.1);
+  --prem-red: #c03434;
+  --prem-red-soft: rgba(192, 52, 52, 0.1);
+
+  /* Radii */
+  --prem-radius-xs: 8px;
+  --prem-radius-sm: 10px;
+  --prem-radius-md: 12px;
+  --prem-radius-lg: 16px;
+  --prem-radius-xl: 20px;
+  --prem-radius-pill: 999px;
+
+  /* Elevation */
+  --prem-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04),
+    0 10px 24px -14px rgba(16, 24, 40, 0.18);
+  --prem-shadow: 0 2px 4px rgba(16, 24, 40, 0.04),
+    0 18px 40px -20px rgba(16, 24, 40, 0.28);
+
+  /* Type */
+  --prem-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+
+  /* Layout */
+  --prem-sidebar-w: 260px;
+  --prem-header-h: 68px;
+  --prem-content-max: 1200px;
+  --prem-gap: 20px;
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --prem-bg: #0e1420;
+  --prem-card: #151d2c;
+  --prem-light: #1b2437;
+
+  --prem-border: #27324a;
+  --prem-border-strong: #35425e;
+
+  --prem-text: #e9eef8;
+  --prem-text-muted: #a2aec4;
+
+  --prem-blue: #7ea0ff;
+  --prem-blue-strong: #a6bdff;
+  --prem-blue-soft: rgba(126, 160, 255, 0.14);
+  --prem-indigo: #8f8bff;
+  --prem-purple: #b18cff;
+  --prem-purple-soft: rgba(177, 140, 255, 0.14);
+
+  --prem-green: #5fd3a6;
+  --prem-green-soft: rgba(95, 211, 166, 0.14);
+  --prem-amber: #f0b866;
+  --prem-amber-soft: rgba(240, 184, 102, 0.14);
+  --prem-red: #ff8f8f;
+  --prem-red-soft: rgba(255, 143, 143, 0.14);
+
+  --prem-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3),
+    0 10px 24px -16px rgba(0, 0, 0, 0.6);
+  --prem-shadow: 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 20px 44px -22px rgba(0, 0, 0, 0.7);
+
+  color-scheme: dark;
+}
+
+/* ---------- Reset ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--prem-bg);
+  color: var(--prem-text);
+  font-family: var(--prem-font);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+svg {
+  flex-shrink: 0;
+}
+
+::selection {
+  background: var(--prem-blue-soft);
+  color: var(--prem-text);
+}
+
+/* ---------- Reusable UI primitives ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: var(--prem-radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background 0.18s ease, border-color 0.18s ease,
+    box-shadow 0.18s ease, transform 0.15s ease;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--prem-blue), var(--prem-purple));
+  color: #ffffff;
+  box-shadow: 0 8px 20px -12px rgba(53, 99, 232, 0.7);
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 12px 26px -12px rgba(53, 99, 232, 0.85);
+}
+
+.btn-secondary {
+  background: var(--prem-card);
+  border-color: var(--prem-border);
+  color: var(--prem-text);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--prem-light);
+  border-color: var(--prem-border-strong);
+}
+
+.btn-soft {
+  background: var(--prem-blue-soft);
+  color: var(--prem-blue-strong);
+}
+
+.btn-soft:hover:not(:disabled) {
+  background: var(--prem-blue-soft);
+  border-color: var(--prem-blue);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-sm);
+  color: var(--prem-text);
+  font-size: 0.875rem;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--prem-text-muted);
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--prem-blue);
+  box-shadow: 0 0 0 3px var(--prem-blue-soft);
+}
+
+.input:disabled,
+.select:disabled,
+.textarea:disabled {
+  background: var(--prem-light);
+  cursor: not-allowed;
+}
+
+/* ---------- Page layout primitives ---------- */
+
+.page-container {
+  width: 100%;
+  max-width: var(--prem-content-max);
+  margin: 0 auto;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.page-eyebrow {
+  margin-bottom: 4px;
+  color: var(--prem-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.page-title {
+  color: var(--prem-text);
+  font-size: clamp(1.65rem, 1.2vw + 1.2rem, 2.1rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.page-subtitle {
+  margin-top: 6px;
+  color: var(--prem-text-muted);
+  font-size: 0.92rem;
+}
+
+/* ---------- Card primitives ---------- */
+
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-title {
+  color: var(--prem-text);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.card-subtitle {
+  margin-top: 2px;
+  color: var(--prem-text-muted);
+  font-size: 0.78rem;
+}
+
+.card-chip {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border-radius: var(--prem-radius-pill);
+  background: var(--prem-blue-soft);
+  color: var(--prem-blue-strong);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-head-icon {
+  color: var(--prem-text-muted);
+}
+
+.section-title {
+  margin-bottom: 16px;
+  color: var(--prem-text);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Focus & motion ---------- */
+
+:focus-visible {
+  outline: 2px solid var(--prem-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2000;
+  padding: 10px 16px;
+  border-radius: var(--prem-radius-sm);
+  background: var(--prem-card);
+  color: var(--prem-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: var(--prem-shadow);
+  transform: translateY(-160%);
+  transition: transform 0.2s ease;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

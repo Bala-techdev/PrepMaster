@@ -1,0 +1,437 @@
+.progress-page {
+  width: 100%;
+}
+
+/* ---------- Top row ---------- */
+
+.progress-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: var(--prem-gap);
+  margin-bottom: var(--prem-gap);
+}
+
+.overall-progress-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 22px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-lg);
+  box-shadow: var(--prem-shadow-sm);
+}
+
+.overall-note {
+  color: var(--prem-text-muted);
+  font-size: 0.8rem;
+}
+
+.progress-note {
+  display: block;
+  margin-bottom: var(--prem-gap);
+  padding: 12px 14px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-left: 3px solid var(--prem-blue);
+  border-radius: var(--prem-radius-sm);
+  color: var(--prem-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.progress-note strong {
+  color: var(--prem-text);
+  font-weight: 600;
+}
+
+.overall-breakdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.overall-breakdown span {
+  padding: 4px 9px;
+  background: var(--prem-light);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-pill);
+  color: var(--prem-text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.progress-section-head .section-title {
+  margin-bottom: 0;
+}
+
+.section-count {
+  color: var(--prem-text-muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.performance-note {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--prem-border);
+  color: var(--prem-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.progress-side .statistics-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.progress-heatmap {
+  margin-bottom: var(--prem-gap);
+}
+
+.interview-item.completed .interview-result {
+  color: var(--prem-blue-strong);
+}
+
+.history-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--prem-border);
+  color: var(--prem-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.history-note svg {
+  margin-top: 2px;
+}
+
+.streak-cards {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+/* ---------- Two-column content ---------- */
+
+.progress-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: var(--prem-gap);
+  align-items: start;
+  margin-bottom: var(--prem-gap);
+}
+
+.progress-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--prem-gap);
+}
+
+.topic-performance,
+.level-progression,
+.activity-section,
+.problems-statistics,
+.mock-interview-history {
+  min-width: 0;
+  padding: 22px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-lg);
+  box-shadow: var(--prem-shadow-sm);
+}
+
+/* ---------- Topic performance ---------- */
+
+.performance-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.performance-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.performance-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.8rem;
+}
+
+.performance-topic {
+  color: var(--prem-text);
+  font-weight: 600;
+}
+
+.performance-percentage {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--prem-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.performance-percent-value {
+  color: var(--prem-text);
+  font-weight: 700;
+}
+
+.performance-track {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  background: var(--prem-light);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-pill);
+}
+
+.performance-bar-fill {
+  height: 100%;
+  border-radius: var(--prem-radius-pill);
+  transition: width 0.5s ease;
+}
+
+/* ---------- Level ---------- */
+
+.level-progress-grid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.level-progress-value {
+  color: var(--prem-text);
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.level-progress-note {
+  color: var(--prem-text-muted);
+  font-size: 0.75rem;
+}
+
+.level-progress-percent {
+  padding: 5px 10px;
+  border-radius: var(--prem-radius-pill);
+  background: var(--prem-purple-soft);
+  color: var(--prem-purple);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* ---------- Weekly activity ---------- */
+
+.activity-preview {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.heat-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  background: var(--prem-light);
+  box-shadow: inset 0 0 0 1px var(--prem-border);
+}
+
+.heat-level-1 {
+  background: var(--prem-light);
+}
+
+.heat-level-2 {
+  background: color-mix(in srgb, var(--prem-blue) 30%, var(--prem-light));
+}
+
+.heat-level-3 {
+  background: color-mix(in srgb, var(--prem-blue) 60%, var(--prem-light));
+}
+
+.heat-level-4 {
+  background: var(--prem-blue);
+}
+
+.heatmap-caption {
+  margin-top: 10px;
+  color: var(--prem-text-muted);
+  font-size: 0.72rem;
+}
+
+/* ---------- Problems solved ---------- */
+
+.statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px;
+  background: var(--prem-light);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-md);
+}
+
+.stat-item-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--prem-blue);
+}
+
+.stat-item-value {
+  color: var(--prem-text);
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-item-label {
+  color: var(--prem-text-muted);
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+/* ---------- Interview history ---------- */
+
+.mock-interview-history {
+  margin-top: var(--prem-gap);
+}
+
+.interview-history-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.interview-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--prem-border);
+  font-size: 0.82rem;
+}
+
+.interview-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.interview-date {
+  min-width: 96px;
+  color: var(--prem-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.interview-difficulty {
+  padding: 3px 9px;
+  border-radius: var(--prem-radius-pill);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.interview-difficulty.easy {
+  background: var(--prem-green-soft);
+  color: var(--prem-green);
+}
+
+.interview-difficulty.medium {
+  background: var(--prem-amber-soft);
+  color: var(--prem-amber);
+}
+
+.interview-difficulty.hard {
+  background: var(--prem-red-soft);
+  color: var(--prem-red);
+}
+
+.interview-topic {
+  color: var(--prem-text);
+  font-weight: 600;
+}
+
+.interview-duration {
+  color: var(--prem-text-muted);
+}
+
+.interview-result {
+  margin-left: auto;
+  font-weight: 700;
+}
+
+.interview-item.passed .interview-result {
+  color: var(--prem-green);
+}
+
+.interview-item.failed .interview-result {
+  color: var(--prem-red);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1024px) {
+  .progress-top,
+  .progress-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .streak-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .statistics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .streak-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .topic-performance,
+  .level-progression,
+  .activity-section,
+  .problems-statistics,
+  .mock-interview-history,
+  .overall-progress-card {
+    padding: 18px;
+  }
+
+  .interview-date {
+    min-width: 0;
+  }
+
+  .interview-result {
+    margin-left: 0;
+  }
+}

@@ -1,0 +1,417 @@
+/* =========================================================
+   DASHBOARD
+   Responsive 12-column grid built on the global tokens.
+========================================================= */
+
+.dashboard-page {
+  width: 100%;
+}
+
+.dashboard-container {
+  width: 100%;
+  max-width: var(--prem-content-max);
+  margin: 0 auto;
+}
+
+/* ---------- Page header ---------- */
+
+.dash-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-pill);
+  color: var(--prem-text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ---------- Grid ---------- */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--prem-gap);
+  align-items: stretch;
+}
+
+.today-blueprint-card {
+  grid-column: span 12;
+}
+
+.daily-progress-card {
+  grid-column: span 7;
+}
+
+.countdown-card {
+  grid-column: span 5;
+}
+
+.dashboard-span-4 {
+  grid-column: span 4;
+}
+
+.quick-actions {
+  grid-column: span 12;
+}
+
+/* ---------- Shared card chrome ---------- */
+
+.daily-progress-card,
+.countdown-card,
+.quick-action-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  padding: 22px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-lg);
+  box-shadow: var(--prem-shadow-sm);
+}
+
+/* ---------- Today's blueprint ---------- */
+
+.today-blueprint-card {
+  position: relative;
+  overflow: hidden;
+  padding: 26px 28px;
+  border-radius: var(--prem-radius-xl);
+  background: radial-gradient(
+      circle at 92% 8%,
+      rgba(255, 255, 255, 0.2),
+      transparent 30%
+    ),
+    linear-gradient(
+      120deg,
+      var(--prem-blue) 0%,
+      var(--prem-indigo) 55%,
+      var(--prem-purple) 100%
+    );
+  color: #ffffff;
+  box-shadow: 0 18px 40px -22px rgba(53, 99, 232, 0.85);
+}
+
+.blueprint-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.blueprint-eyebrow {
+  margin-bottom: 4px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.blueprint-title {
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.blueprint-description {
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.85rem;
+}
+
+.blueprint-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--prem-radius-pill);
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.18s ease;
+}
+
+.blueprint-cta:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.blueprint-tasks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.blueprint-tasks li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--prem-radius-md);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-size: 0.83rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.blueprint-tasks li::before {
+  content: "";
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: #b9f4d2;
+  box-shadow: 0 0 0 3px rgba(185, 244, 210, 0.18);
+}
+
+.blueprint-tasks li.is-done {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(185, 244, 210, 0.55);
+}
+
+.blueprint-tasks li.is-done::before {
+  background: #ffffff;
+}
+
+.blueprint-task-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.blueprint-task-title {
+  color: #ffffff;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.blueprint-task-category {
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.blueprint-task-check {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: #b9f4d2;
+}
+
+.blueprint-task-lock,
+.blueprint-task-open {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 2px 7px;
+  border-radius: var(--prem-radius-pill);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.blueprint-task-lock {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.blueprint-task-open {
+  background: rgba(185, 244, 210, 0.2);
+  color: #d7ffe9;
+}
+
+.card-footnote {
+  color: var(--prem-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+/* ---------- Countdown ---------- */
+
+.countdown-timer {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px 6px;
+  background: var(--prem-light);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-md);
+}
+
+.countdown-value {
+  color: var(--prem-text);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.countdown-label {
+  color: var(--prem-text-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ---------- Quick actions ---------- */
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--prem-gap);
+}
+
+.quick-action-card {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  min-height: 88px;
+  padding: 18px 20px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.quick-action-card:hover {
+  border-color: var(--prem-border-strong);
+  box-shadow: var(--prem-shadow);
+  transform: translateY(-2px);
+}
+
+.quick-action-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: var(--prem-radius-md);
+}
+
+.quick-action-icon.indigo {
+  background: var(--prem-blue-soft);
+  color: var(--prem-blue-strong);
+}
+
+.quick-action-icon.green {
+  background: var(--prem-green-soft);
+  color: var(--prem-green);
+}
+
+.quick-action-icon.amber {
+  background: var(--prem-amber-soft);
+  color: var(--prem-amber);
+}
+
+.quick-action-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.quick-action-title {
+  color: var(--prem-text-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.quick-action-value {
+  color: var(--prem-text);
+  font-size: 1.02rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+.quick-action-arrow {
+  margin-left: auto;
+  color: var(--prem-text-muted);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1100px) {
+  .daily-progress-card,
+  .countdown-card {
+    grid-column: span 12;
+  }
+
+  .dashboard-span-4 {
+    grid-column: span 6;
+  }
+
+  .activity-heatmap.dashboard-span-4 {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 900px) {
+  .blueprint-tasks {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-grid {
+    gap: 14px;
+  }
+
+  .page-head {
+    margin-bottom: 18px;
+  }
+
+  .today-blueprint-card,
+  .daily-progress-card,
+  .countdown-card,
+  .quick-action-card {
+    padding: 18px;
+  }
+
+  .dashboard-span-4,
+  .activity-heatmap.dashboard-span-4 {
+    grid-column: span 12;
+  }
+
+  .blueprint-title {
+    font-size: 1.2rem;
+  }
+
+  .countdown-value {
+    font-size: 1.3rem;
+  }
+
+  .dash-date {
+    width: 100%;
+    justify-content: center;
+  }
+}

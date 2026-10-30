@@ -1,0 +1,91 @@
+.streak-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 22px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-lg);
+  box-shadow: var(--prem-shadow-sm);
+}
+
+.streak-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.streak-title {
+  color: var(--prem-text);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.streak-header-icon {
+  color: var(--prem-text-muted);
+}
+
+.streak-current {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.streak-fire-wrap {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: var(--prem-radius-md);
+  background: var(--prem-amber-soft);
+}
+
+.streak-fire-icon {
+  color: var(--prem-amber);
+}
+
+.streak-numbers {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.streak-value {
+  color: var(--prem-text);
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.streak-label {
+  color: var(--prem-text-muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.streak-longest {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--prem-border);
+  color: var(--prem-text-muted);
+  font-size: 0.78rem;
+  flex-wrap: wrap;
+}
+
+.streak-longest strong {
+  color: var(--prem-text);
+  font-weight: 600;
+}
+
+.trending-icon {
+  color: var(--prem-green);
+}

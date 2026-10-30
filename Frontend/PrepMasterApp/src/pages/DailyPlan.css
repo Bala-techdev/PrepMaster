@@ -1,0 +1,133 @@
+.daily-plan-page {
+  width: 100%;
+}
+
+.daily-plan-container {
+  max-width: 1080px;
+}
+
+/* ---------- Summary ---------- */
+
+.plan-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(260px, 100%);
+  padding: 14px 16px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-lg);
+  box-shadow: var(--prem-shadow-sm);
+}
+
+.plan-summary-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.plan-summary-count {
+  color: var(--prem-text);
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-summary-label {
+  color: var(--prem-text-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+/* ---------- Task list ---------- */
+
+.daily-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.unlock-explanation {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-left: 3px solid var(--prem-blue);
+  border-radius: var(--prem-radius-md);
+  color: var(--prem-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.unlock-explanation strong {
+  color: var(--prem-text);
+  font-weight: 600;
+}
+
+.plan-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: var(--prem-radius-md);
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.plan-status svg {
+  margin-top: 2px;
+}
+
+.plan-status.is-success {
+  background: var(--prem-green-soft);
+  border: 1px solid color-mix(in srgb, var(--prem-green) 28%, var(--prem-border));
+  color: var(--prem-green);
+}
+
+.plan-status.is-error {
+  background: var(--prem-red-soft);
+  border: 1px solid color-mix(in srgb, var(--prem-red) 28%, var(--prem-border));
+  color: var(--prem-red);
+}
+
+.task-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.task-detail h3 {
+  margin-bottom: 4px;
+  color: var(--prem-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.task-detail-block {
+  padding: 12px 14px;
+  background: var(--prem-light);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-md);
+}
+
+.task-detail-meta {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  color: var(--prem-text-muted);
+  font-size: 0.78rem;
+}
+
+.task-detail-meta svg {
+  margin-top: 2px;
+  color: var(--prem-green);
+}
+
+@media (max-width: 640px) {
+  .plan-summary {
+    width: 100%;
+  }
+}

@@ -1,0 +1,74 @@
+.level-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 22px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-lg);
+  box-shadow: var(--prem-shadow-sm);
+}
+
+.level-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.level-eyebrow {
+  color: var(--prem-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.level-label {
+  margin-top: 2px;
+  color: var(--prem-text);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.xp-label {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border-radius: var(--prem-radius-pill);
+  background: var(--prem-purple-soft);
+  color: var(--prem-purple);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.level-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.level-progress-text {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--prem-text-muted);
+  font-size: 0.78rem;
+}
+
+.level-next {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--prem-border);
+  color: var(--prem-text-muted);
+  font-size: 0.78rem;
+}
+
+.next-icon {
+  color: var(--prem-purple);
+}

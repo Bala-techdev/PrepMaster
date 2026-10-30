@@ -1,0 +1,116 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  height: 64px;
+  background: var(--prem-card);
+  border-bottom: 1px solid var(--prem-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 24px;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--prem-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo span {
+  background: linear-gradient(135deg, var(--prem-blue), var(--prem-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.topbar-search {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 24px;
+  display: flex;
+  align-items: center;
+  background: var(--prem-light);
+  border-radius: 20px;
+  padding: 0 16px;
+}
+
+.search-icon {
+  color: var(--prem-text-muted);
+  flex-shrink: 0;
+}
+
+.topbar-search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.875rem;
+  color: var(--prem-text);
+  width: 100%;
+}
+
+.topbar-search input::placeholder {
+  color: var(--prem-text-muted);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: padding: 8px;
+  padding: 8px;
+  border-radius: 50%;
+  color: var(--prem-text-muted);
+  transition: color 0.2s, background 0.2s;
+}
+
+.theme-toggle:hover {
+  background: var(--prem-light);
+  color: var(--prem-text);
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: var(--prem-light);
+  font-size: 0.875rem;
+}
+
+.user-profile:hover {
+  background: var(--prem-card);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--prem-card);
+}
+
+.user-name {
+  color: var(--prem-text);
+  font-weight: 500;
+}
+
+.user-arrow {
+  margin-left: 4px;
+  font-size: 0.625rem;
+}
+
+/* Hide checkbox for custom styling */
+.theme-toggle[type="checkbox"] {
+  display: none;
+}

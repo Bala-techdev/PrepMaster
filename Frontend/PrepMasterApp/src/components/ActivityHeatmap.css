@@ -1,0 +1,116 @@
+.activity-heatmap {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  padding: 22px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-lg);
+  box-shadow: var(--prem-shadow-sm);
+}
+
+.heatmap-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.heatmap-title {
+  color: var(--prem-text);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.heatmap-subtitle {
+  margin-top: 2px;
+  color: var(--prem-text-muted);
+  font-size: 0.78rem;
+}
+
+.heatmap-head-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--prem-text-muted);
+}
+
+.activity-heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(30, minmax(0, 1fr));
+  gap: 4px;
+  width: 100%;
+}
+
+.activity-cell {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+  background: var(--prem-light);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.activity-cell.level-0 {
+  background: var(--prem-light);
+  box-shadow: inset 0 0 0 1px var(--prem-border);
+}
+
+.activity-cell.level-1 {
+  background: color-mix(in srgb, var(--prem-blue) 24%, var(--prem-light));
+}
+
+.activity-cell.level-2 {
+  background: color-mix(in srgb, var(--prem-blue) 46%, var(--prem-light));
+}
+
+.activity-cell.level-3 {
+  background: color-mix(in srgb, var(--prem-blue) 70%, var(--prem-light));
+}
+
+.activity-cell.level-4 {
+  background: var(--prem-blue);
+}
+
+.activity-heatmap-grid .activity-cell:hover {
+  transform: scale(1.15);
+}
+
+.activity-heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  color: var(--prem-text-muted);
+  font-size: 0.7rem;
+}
+
+.activity-heatmap-legend .activity-cell {
+  width: 12px;
+  height: 12px;
+  aspect-ratio: auto;
+}
+
+.heatmap-note {
+  color: var(--prem-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 1024px) {
+  .activity-heatmap-grid {
+    grid-template-columns: repeat(15, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .activity-heatmap {
+    padding: 18px;
+  }
+
+  .activity-heatmap-grid {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 5px;
+  }
+}

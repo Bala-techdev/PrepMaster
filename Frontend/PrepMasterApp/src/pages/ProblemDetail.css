@@ -1,0 +1,251 @@
+.problem-detail-page {
+  width: 100%;
+}
+
+.problem-detail-container {
+  max-width: 980px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+  color: var(--prem-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: var(--prem-radius-xs);
+}
+
+.back-link:hover {
+  color: var(--prem-blue-strong);
+}
+
+.problem-detail-head {
+  align-items: flex-end;
+}
+
+.problem-detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.problem-detail-status {
+  min-height: 20px;
+  margin: -8px 0 12px;
+  color: var(--prem-green);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.problem-detail-card {
+  min-width: 0;
+  padding: 22px;
+  margin-bottom: var(--prem-gap);
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-lg);
+  box-shadow: var(--prem-shadow-sm);
+}
+
+.problem-detail-card .section-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.problem-detail-card .section-title svg {
+  color: var(--prem-blue);
+}
+
+.problem-description {
+  color: var(--prem-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.problem-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--prem-gap);
+}
+
+.problem-detail-grid .problem-detail-card {
+  margin-bottom: var(--prem-gap);
+}
+
+.detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-list li {
+  position: relative;
+  padding-left: 16px;
+  color: var(--prem-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.detail-list li::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--prem-blue);
+}
+
+.problem-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.problem-example {
+  padding: 14px 16px;
+  background: var(--prem-light);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-md);
+}
+
+.problem-example-label {
+  margin-bottom: 8px;
+  color: var(--prem-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.problem-example dl {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.problem-example dl > div {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.problem-example dt {
+  min-width: 54px;
+  color: var(--prem-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.problem-example dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--prem-text);
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.problem-example code {
+  padding: 2px 6px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-xs);
+  font-size: 0.76rem;
+}
+
+.complexity-line {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--prem-border);
+  color: var(--prem-text-muted);
+  font-size: 0.8rem;
+}
+
+.complexity-line strong {
+  color: var(--prem-text);
+}
+
+.hint-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hint-item {
+  background: var(--prem-light);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-md);
+}
+
+.hint-item summary {
+  padding: 11px 14px;
+  color: var(--prem-text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--prem-radius-md);
+}
+
+.hint-item summary:focus-visible {
+  outline: 2px solid var(--prem-blue);
+  outline-offset: 2px;
+}
+
+.hint-item p {
+  padding: 0 14px 12px;
+  color: var(--prem-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.code-block {
+  max-width: 100%;
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+  background: var(--prem-light);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-md);
+  color: var(--prem-text);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  tab-size: 2;
+}
+
+.code-note {
+  margin-top: 10px;
+  color: var(--prem-text-muted);
+  font-size: 0.72rem;
+}
+
+@media (max-width: 800px) {
+  .problem-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .problem-detail-card {
+    padding: 18px;
+  }
+
+  .problem-example dl > div {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .problem-detail-head .btn {
+    width: 100%;
+  }
+}

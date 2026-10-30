@@ -1,0 +1,263 @@
+.settings-page {
+  width: 100%;
+}
+
+.settings-container {
+  max-width: 760px;
+}
+
+.setting-group {
+  padding: 22px;
+  margin-bottom: var(--prem-gap);
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-lg);
+  box-shadow: var(--prem-shadow-sm);
+}
+
+.setting-group-title {
+  margin-bottom: 16px;
+  color: var(--prem-text);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--prem-border);
+}
+
+.setting-row:first-of-type {
+  padding-top: 0;
+}
+
+.setting-row:last-of-type {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.setting-row-stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.setting-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.setting-name {
+  color: var(--prem-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.setting-desc {
+  color: var(--prem-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.settings-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--prem-light);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-sm);
+  color: var(--prem-text-muted);
+  font-size: 0.74rem;
+  line-height: 1.55;
+}
+
+.settings-note svg {
+  margin-top: 2px;
+  flex-shrink: 0;
+  color: var(--prem-blue);
+}
+
+.setting-group .field-error {
+  margin-top: 8px;
+}
+
+/* ---------- Switch ---------- */
+
+.switch {
+  position: relative;
+  display: inline-flex;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.switch-input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--prem-radius-pill);
+  background: var(--prem-border-strong);
+  transition: background 0.2s ease;
+}
+
+.switch-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.switch-input:checked + .switch-track {
+  background: var(--prem-blue);
+}
+
+.switch-input:checked + .switch-track::after {
+  transform: translateX(20px);
+}
+
+.switch-input:focus-visible + .switch-track {
+  outline: 2px solid var(--prem-blue);
+  outline-offset: 2px;
+}
+
+.switch-input:disabled {
+  cursor: not-allowed;
+}
+
+.switch-input:disabled + .switch-track {
+  opacity: 0.45;
+}
+
+/* ---------- Preferences ---------- */
+
+.preference-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.preference-tag {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-pill);
+  background: var(--prem-light);
+  color: var(--prem-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background 0.18s ease, border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.preference-tag:hover {
+  border-color: var(--prem-border-strong);
+  color: var(--prem-text);
+}
+
+.preference-tag.active {
+  background: var(--prem-blue);
+  border-color: var(--prem-blue);
+  color: #ffffff;
+}
+
+.goal-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.goal-value {
+  min-width: 92px;
+  color: var(--prem-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-page .stepper-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-sm);
+  background: var(--prem-light);
+  color: var(--prem-purple);
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.settings-page .stepper-btn:hover:not(:disabled) {
+  background: var(--prem-purple-soft);
+  border-color: var(--prem-purple);
+}
+
+.settings-page .stepper-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- Save ---------- */
+
+.save-settings {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 4px 0 8px;
+}
+
+.settings-page .save-feedback {
+  color: var(--prem-green);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .setting-group {
+    padding: 18px;
+  }
+
+  .setting-row {
+    flex-wrap: wrap;
+  }
+
+  .switch {
+    margin-left: auto;
+  }
+
+  .save-settings {
+    justify-content: stretch;
+  }
+
+  .save-settings .btn {
+    width: 100%;
+  }
+}

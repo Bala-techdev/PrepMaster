@@ -1,0 +1,25 @@
+.difficulty-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: var(--prem-radius-pill);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.difficulty-badge.easy {
+  background: var(--prem-green-soft);
+  color: var(--prem-green);
+}
+
+.difficulty-badge.medium {
+  background: var(--prem-amber-soft);
+  color: var(--prem-amber);
+}
+
+.difficulty-badge.hard {
+  background: var(--prem-red-soft);
+  color: var(--prem-red);
+}
