@@ -16,6 +16,9 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -107,6 +110,42 @@ class AuthControllerTests {
 				.andExpect(jsonPath("$.errors.password").exists());
 	}
 
+	@Test
+	void rotatesRefreshTokenAndRevokesItOnLogout() throws Exception {
+		register("refresh@example.com");
+		MvcResult login = mockMvc.perform(post("/api/auth/login")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+						{"email":"refresh@example.com","password":"StrongPass1"}
+						"""))
+				.andExpect(status().isOk())
+				.andReturn();
+		String refreshToken = tokenFrom(login.getResponse().getContentAsString());
+
+		MvcResult refreshed = mockMvc.perform(post("/api/auth/refresh")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(""" 
+						{"refreshToken":"%s"}
+						""".formatted(refreshToken)))
+				.andExpect(status().isOk())
+				.andReturn();
+		String rotated = tokenFrom(refreshed.getResponse().getContentAsString());
+
+		mockMvc.perform(post("/api/auth/refresh")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(""" 
+						{"refreshToken":"%s"}
+						""".formatted(refreshToken)))
+				.andExpect(status().isUnauthorized());
+
+		mockMvc.perform(post("/api/auth/logout")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(""" 
+						{"refreshToken":"%s"}
+						""".formatted(rotated)))
+				.andExpect(status().isOk());
+	}
+
 	private void register(String email) throws Exception {
 		mockMvc.perform(post("/api/auth/register")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -114,5 +153,13 @@ class AuthControllerTests {
 						{"displayName":"Test User","email":"%s","password":"StrongPass1"}
 						""".formatted(email)))
 				.andExpect(status().isCreated());
+	}
+
+	private String tokenFrom(String response) {
+		Matcher matcher = Pattern.compile("\"refreshToken\":\"([^\"]+)\"").matcher(response);
+		if (!matcher.find()) {
+			throw new AssertionError("refreshToken missing from authentication response");
+		}
+		return matcher.group(1);
 	}
 }

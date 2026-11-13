@@ -43,3 +43,17 @@ export function PublicOnly() {
 
   return <Outlet />
 }
+
+export function RoleRoute({ roles }) {
+  const { status, user } = useAuth()
+  const location = useLocation()
+
+  if (status === 'loading') return <SessionLoader />
+  if (status !== 'authenticated') {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />
+  }
+  if (!roles.includes(user?.role)) {
+    return <Navigate to="/dashboard" replace />
+  }
+  return <Outlet />
+}

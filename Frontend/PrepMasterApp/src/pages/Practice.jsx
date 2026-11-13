@@ -314,10 +314,10 @@ export default function PracticePage() {
                         )}
                       </span>
                       <Link
-                        to={`/practice/${problem.id}`}
+                        to={`/arena/${problem.id}`}
                         className="btn btn-secondary problem-open-btn"
                       >
-                        Open
+                        Practice
                       </Link>
                     </div>
                   </article>

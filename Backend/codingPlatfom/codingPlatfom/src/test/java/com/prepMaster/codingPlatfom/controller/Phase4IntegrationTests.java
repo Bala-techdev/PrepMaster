@@ -165,6 +165,13 @@ class Phase4IntegrationTests {
 	@Test
 	void corsAllowsTheConfiguredFrontendOriginOnly() throws Exception {
 		mockMvc.perform(options("/api/users/me")
+				.header(HttpHeaders.ORIGIN, "http://localhost:5173")
+				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST")
+				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Content-Type"))
+				.andExpect(status().isOk())
+				.andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:5173"));
+
+		mockMvc.perform(options("/api/users/me")
 				.header(HttpHeaders.ORIGIN, "http://localhost:5180")
 				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
 				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Authorization"))

@@ -53,6 +53,27 @@ public class UserSettings extends AuditableEntity {
 	@Column(nullable = false, length = 64)
 	private String timezone = "UTC";
 
+	@Column(name = "notification_in_app_enabled", nullable = false)
+	private boolean notificationInAppEnabled = true;
+
+	@Column(name = "notification_tasks", nullable = false)
+	private boolean notificationTasks = true;
+
+	@Column(name = "notification_achievements", nullable = false)
+	private boolean notificationAchievements = true;
+
+	@Column(name = "notification_streaks", nullable = false)
+	private boolean notificationStreaks = true;
+
+	@Column(name = "notification_community", nullable = false)
+	private boolean notificationCommunity = true;
+
+	@Column(name = "notification_mock_interviews", nullable = false)
+	private boolean notificationMockInterviews = true;
+
+	@Column(name = "notification_reminders", nullable = false)
+	private boolean notificationReminders = true;
+
 	public UserSettings(User user) {
 		this.user = user;
 	}

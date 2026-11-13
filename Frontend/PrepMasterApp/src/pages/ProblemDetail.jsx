@@ -154,6 +154,9 @@ export default function ProblemDetail() {
               <ExternalLink size={15} aria-hidden="true" />
             </a>
           )}
+          <Link to={`/arena/${problemId}`} className="btn btn-primary">
+            Open coding arena
+          </Link>
         </header>
 
         {isSolved && (

@@ -10,6 +10,13 @@ public record UserSettingsResponse(
 		boolean emailNotifications,
 		int dailyGoalMinutes,
 		LocalTime reminderTime,
-		String timezone
+		String timezone,
+		boolean notificationInAppEnabled,
+		boolean notificationTasks,
+		boolean notificationAchievements,
+		boolean notificationStreaks,
+		boolean notificationCommunity,
+		boolean notificationMockInterviews,
+		boolean notificationReminders
 ) {
 }

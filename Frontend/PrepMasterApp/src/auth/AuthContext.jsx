@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { login as loginRequest, register as registerRequest } from '../api/authService'
+import { login as loginRequest, register as registerRequest, logout as logoutRequest } from '../api/authService'
 import { SESSION_EXPIRED_EVENT } from '../api/client'
 import { getMe } from '../api/userService'
 import {
@@ -7,6 +7,7 @@ import {
   getAccessToken,
   getSessionExpiry,
   saveSession,
+  getRefreshToken,
 } from '../api/tokenStorage'
 import { AuthContext } from './useAuth'
 
@@ -118,7 +119,7 @@ export function AuthProvider({ children }) {
 
   const establishSession = useCallback(
     async (response) => {
-      saveSession(response.accessToken, response.expiresAt)
+      saveSession(response.accessToken, response.expiresAt, response.refreshToken, response.refreshExpiresAt)
       scheduleExpiry(response.expiresAt)
       setUser(response.user)
       setStatus('authenticated')
@@ -156,7 +157,15 @@ export function AuthProvider({ children }) {
     [establishSession],
   )
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    const refreshToken = getRefreshToken()
+    if (refreshToken) {
+      try {
+        await logoutRequest(refreshToken)
+      } catch {
+        // Local cleanup still guarantees the browser session is removed.
+      }
+    }
     clearExpiryTimer()
     clearSession()
     setUser(null)

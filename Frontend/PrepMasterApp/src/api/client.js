@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { clearSession, getAccessToken } from './tokenStorage'
+import { clearSession, getAccessToken, getRefreshToken, saveSession } from './tokenStorage'
 
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
@@ -33,11 +33,31 @@ client.interceptors.request.use((config) => {
 
 client.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     const normalized = normalizeApiError(error)
     const url = error.config?.url || ''
     const isAuthAttempt =
-      url.includes('/auth/login') || url.includes('/auth/register')
+      url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh')
+
+    if (normalized.status === 401 && !isAuthAttempt && !error.config?._authRetry) {
+      const refreshToken = getRefreshToken()
+      if (refreshToken) {
+        try {
+          const refreshResponse = await client.post('/auth/refresh', { refreshToken })
+          saveSession(
+            refreshResponse.data.accessToken,
+            refreshResponse.data.expiresAt,
+            refreshResponse.data.refreshToken,
+            refreshResponse.data.refreshExpiresAt,
+          )
+          error.config._authRetry = true
+          error.config.headers.Authorization = `Bearer ${refreshResponse.data.accessToken}`
+          return client.request(error.config)
+        } catch {
+          // The session-expired event below clears invalid or rotated credentials.
+        }
+      }
+    }
 
     if (normalized.status === 401 && !isAuthAttempt) {
       clearSession()

@@ -51,6 +51,13 @@ public class GlobalExceptionHandler {
 		return problem;
 	}
 
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ProblemDetail handleIllegalArgument(IllegalArgumentException exception) {
+		ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+		problem.setTitle("Invalid request");
+		return problem;
+	}
+
 	@ExceptionHandler(DataIntegrityViolationException.class)
 	public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException exception) {
 		ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
@@ -64,6 +71,21 @@ public class GlobalExceptionHandler {
 		ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED,
 				"Invalid email or password");
 		problem.setTitle("Authentication failed");
+		return problem;
+	}
+
+	@ExceptionHandler(RateLimitExceededException.class)
+	public ProblemDetail handleRateLimit(RateLimitExceededException exception) {
+		ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS,
+				exception.getMessage());
+		problem.setTitle("Too many requests");
+		return problem;
+	}
+
+	@ExceptionHandler(SubscriptionLimitExceededException.class)
+	public ProblemDetail handleSubscriptionLimit(SubscriptionLimitExceededException exception) {
+		ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, exception.getMessage());
+		problem.setTitle("Monthly scan limit reached");
 		return problem;
 	}
 }

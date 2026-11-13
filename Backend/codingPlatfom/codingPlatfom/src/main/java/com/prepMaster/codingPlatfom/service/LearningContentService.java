@@ -50,7 +50,8 @@ public class LearningContentService {
 	public Question createQuestion(QuestionRequest r) {
 		Set<QuestionTag> selected = r.tagIds() == null ? Set.of() : Set.copyOf(tags.findByIdIn(r.tagIds()));
 		return question(questions.save(new DSAQuestion(topicEntity(r.topicId()), r.title(), r.description(), r.difficulty(),
-				r.constraints(), r.examples(), r.expectedTimeComplexity(), r.expectedSpaceComplexity(), r.practiceUrl(), selected)));
+				r.constraints(), r.examples(), r.expectedTimeComplexity(), r.expectedSpaceComplexity(), r.practiceUrl(),
+				r.testCases(), selected)));
 	}
 	private LearningCategory categoryEntity(Long id) { return categories.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found: " + id)); }
 	private LearningTopic topicEntity(Long id) { return topics.findById(id).orElseThrow(() -> new ResourceNotFoundException("Topic not found: " + id)); }
@@ -59,6 +60,6 @@ public class LearningContentService {
 	private Resource resource(LearningResource r) { return new Resource(r.getId(), r.getTopic().getId(), r.getTitle(), r.getDescription(), r.getResourceUrl()); }
 	private Question question(DSAQuestion q) { return new Question(q.getId(), q.getTopic().getId(), q.getTopic().getName(), q.getTitle(), q.getDescription(), q.getDifficulty(),
 			q.getConstraints(), q.getExamples(), q.getExpectedTimeComplexity(), q.getExpectedSpaceComplexity(), q.getPracticeUrl(),
-			q.getTags().stream().map(t -> new Tag(t.getId(), t.getName(), t.getSlug())).collect(Collectors.toList())); }
+			q.getTestCases(), q.getTags().stream().map(t -> new Tag(t.getId(), t.getName(), t.getSlug())).collect(Collectors.toList())); }
 	private Tag tag(QuestionTag t) { return new Tag(t.getId(), t.getName(), t.getSlug()); }
 }

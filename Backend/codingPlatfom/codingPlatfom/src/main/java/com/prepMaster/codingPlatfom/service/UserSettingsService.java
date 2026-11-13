@@ -32,6 +32,27 @@ public class UserSettingsService {
 		settings.setDailyGoalMinutes(request.dailyGoalMinutes());
 		settings.setReminderTime(request.reminderTime());
 		settings.setTimezone(request.timezone().trim());
+		if (request.notificationInAppEnabled() != null) {
+			settings.setNotificationInAppEnabled(request.notificationInAppEnabled());
+		}
+		if (request.notificationTasks() != null) {
+			settings.setNotificationTasks(request.notificationTasks());
+		}
+		if (request.notificationAchievements() != null) {
+			settings.setNotificationAchievements(request.notificationAchievements());
+		}
+		if (request.notificationStreaks() != null) {
+			settings.setNotificationStreaks(request.notificationStreaks());
+		}
+		if (request.notificationCommunity() != null) {
+			settings.setNotificationCommunity(request.notificationCommunity());
+		}
+		if (request.notificationMockInterviews() != null) {
+			settings.setNotificationMockInterviews(request.notificationMockInterviews());
+		}
+		if (request.notificationReminders() != null) {
+			settings.setNotificationReminders(request.notificationReminders());
+		}
 		return UserMapper.toSettingsResponse(settings);
 	}
 

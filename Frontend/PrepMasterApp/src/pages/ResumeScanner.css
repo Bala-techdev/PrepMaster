@@ -1,0 +1,52 @@
+.ats-page { padding-bottom: 48px; }
+.ats-limit-chip { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border-radius: 999px; background: var(--prem-blue-soft); color: var(--prem-blue-strong); font-size: .78rem; font-weight: 700; }
+.ats-layout { display: grid; grid-template-columns: minmax(320px, .9fr) minmax(0, 1.1fr); gap: 20px; align-items: start; }
+.ats-form-card, .ats-score-card, .ats-profile-card, .ats-recommendations { padding: 24px; }
+.ats-dropzone { display: flex; min-height: 170px; margin: 20px 0; border: 1px dashed var(--prem-border-strong); border-radius: var(--prem-radius-lg); align-items: center; justify-content: center; flex-direction: column; gap: 7px; color: var(--prem-blue); cursor: pointer; background: var(--prem-light); text-align: center; transition: border-color .2s, background .2s; }
+.ats-dropzone:hover, .ats-dropzone.is-dragging { border-color: var(--prem-blue); background: var(--prem-blue-soft); }
+.ats-dropzone strong { color: var(--prem-text); font-size: .95rem; }
+.ats-dropzone span, .ats-score-card p, .ats-empty p, .ats-profile-card p { color: var(--prem-text-muted); font-size: .82rem; }
+.ats-preview { width: 100%; height: 190px; border: 1px solid var(--prem-border); border-radius: var(--prem-radius-md); margin-bottom: 18px; background: var(--prem-light); }
+.ats-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ats-fields label, .ats-description { display: grid; gap: 7px; color: var(--prem-text); font-size: .82rem; font-weight: 600; }
+.ats-fields input, .ats-fields select, .ats-description textarea { width: 100%; border: 1px solid var(--prem-border); border-radius: var(--prem-radius-sm); padding: 10px 12px; background: var(--prem-card); color: var(--prem-text); font-size: .88rem; }
+.ats-description { margin-top: 16px; }
+.ats-description textarea { resize: vertical; line-height: 1.5; }
+.ats-submit { width: 100%; margin-top: 18px; }
+.ats-upload-progress { margin-top: 14px; height: 34px; background: var(--prem-light); border-radius: 8px; overflow: hidden; position: relative; }
+.ats-upload-progress span { display: block; height: 100%; background: var(--prem-blue-soft); transition: width .2s; }
+.ats-upload-progress small { position: absolute; inset: 0; display: grid; place-items: center; color: var(--prem-text-muted); font-size: .72rem; }
+.ats-results { display: grid; gap: 20px; }
+.ats-empty { min-height: 360px; padding: 32px; display: grid; place-content: center; justify-items: center; text-align: center; color: var(--prem-blue); }
+.ats-empty h2 { margin-top: 14px; color: var(--prem-text); font-size: 1.15rem; }
+.ats-empty p { max-width: 360px; margin-top: 7px; line-height: 1.6; }
+.ats-score-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.ats-score-card h2 { color: var(--prem-text); font-size: 1.25rem; }
+.ats-score { color: var(--prem-blue); font-size: 3rem; font-weight: 800; line-height: 1; }
+.ats-score small { color: var(--prem-text-muted); font-size: .9rem; font-weight: 600; }
+.ats-stat-grid, .ats-result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.ats-stat-grid .card { padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; }
+.ats-stat-grid span { color: var(--prem-text-muted); font-size: .82rem; }
+.ats-stat-grid strong { color: var(--prem-text); font-size: 1.25rem; }
+.ats-result-grid { grid-template-columns: repeat(3, 1fr); }
+.ats-result-card { padding: 20px; background: var(--prem-card); border: 1px solid var(--prem-border); border-radius: var(--prem-radius-lg); }
+.ats-result-card h3, .ats-recommendations h2, .ats-profile-card h2 { color: var(--prem-text); font-size: .95rem; margin-bottom: 14px; }
+.ats-pills { display: flex; gap: 7px; flex-wrap: wrap; }
+.ats-pill { padding: 5px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+.ats-pill.matched { color: var(--prem-green); background: var(--prem-green-soft); }
+.ats-pill.missing { color: var(--prem-red); background: var(--prem-red-soft); }
+.ats-pill.partial { color: var(--prem-amber); background: var(--prem-amber-soft); }
+.ats-muted { color: var(--prem-text-muted); font-size: .78rem; }
+.ats-recommendations ul { display: grid; gap: 11px; }
+.ats-recommendations li { display: flex; align-items: flex-start; gap: 8px; color: var(--prem-text-muted); font-size: .84rem; line-height: 1.5; }
+.ats-recommendations li svg { color: var(--prem-green); margin-top: 3px; }
+.ats-strength { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--prem-border); color: var(--prem-text-muted); font-size: .82rem; line-height: 1.5; }
+@media (max-width: 900px) { .ats-layout { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .ats-fields, .ats-stat-grid, .ats-result-grid { grid-template-columns: 1fr; } .ats-score-card { align-items: flex-start; flex-direction: column; } }
+.ats-history-list { padding: 8px 20px; }
+.ats-history-row { display: flex; justify-content: space-between; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--prem-border); }
+.ats-history-row:last-child { border-bottom: 0; }
+.ats-history-row strong { display: block; color: var(--prem-text); font-size: .9rem; }
+.ats-history-row span { display: block; margin-top: 4px; color: var(--prem-text-muted); font-size: .78rem; }
+.ats-history-score { min-width: 90px; text-align: right; }
+.ats-history-score strong { color: var(--prem-blue); font-size: 1.25rem; }

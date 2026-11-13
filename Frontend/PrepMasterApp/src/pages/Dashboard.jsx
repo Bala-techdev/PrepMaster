@@ -16,6 +16,7 @@ import StreakCard from '../components/StreakCard'
 import { useAppData } from '../state/useAppData'
 import { useAppState } from '../state/appContext'
 import { msUntilMidnight, pad } from '../lib/date'
+import { getArenaOverview } from '../api/arenaService'
 import './Dashboard.css'
 
 const padValue = (value) => pad(value)
@@ -33,6 +34,7 @@ export default function Dashboard() {
   const { interviews } = useAppState()
   const [remainingMs, setRemainingMs] = useState(msUntilMidnight)
   const [today, setToday] = useState(formatToday)
+  const [arena, setArena] = useState(null)
 
   useEffect(() => {
     const tick = () => {
@@ -45,6 +47,14 @@ export default function Dashboard() {
     const timer = window.setInterval(tick, 1000)
 
     return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    getArenaOverview()
+      .then((data) => active && setArena(data))
+      .catch(() => {})
+    return () => { active = false }
   }, [])
 
   const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000))
@@ -243,6 +253,20 @@ export default function Dashboard() {
             className="dashboard-span-4"
             note="Activity is recorded by the backend when you complete a daily-plan task. A day with no completed tasks stays empty."
           />
+
+          {arena && (
+            <section className="daily-progress-card dashboard-span-4" aria-labelledby="arena-progress-title">
+              <div className="card-head">
+                <div>
+                  <h2 className="card-title" id="arena-progress-title">DSA Arena</h2>
+                  <p className="card-subtitle">{arena.levelName} · {arena.totalXp} XP · {arena.solvedProblems} solved</p>
+                </div>
+                <Link to="/practice" className="btn btn-secondary">Practice</Link>
+              </div>
+              <ProgressBar label="Current level" percentage={Math.min(100, (arena.totalXp % 1000) / 10)} />
+              {arena.recommendations?.length > 0 && <p className="card-footnote">Recommended next: {arena.recommendations[0].title}</p>}
+            </section>
+          )}
 
           <nav className="quick-actions" aria-label="Quick actions">
             {quickActions.map((action) => {

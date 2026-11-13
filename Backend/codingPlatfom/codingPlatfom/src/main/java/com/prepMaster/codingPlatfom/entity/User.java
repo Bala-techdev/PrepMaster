@@ -1,6 +1,8 @@
 package com.prepMaster.codingPlatfom.entity;
 
 import com.prepMaster.codingPlatfom.entity.enums.AccountStatus;
+import com.prepMaster.codingPlatfom.entity.enums.UserRole;
+import com.prepMaster.codingPlatfom.entity.enums.SubscriptionTier;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -40,6 +42,20 @@ public class User extends AuditableEntity {
 	@Column(nullable = false, length = 16)
 	private AccountStatus status = AccountStatus.ACTIVE;
 
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, length = 16)
+	private UserRole role = UserRole.USER;
+
+	@Column(name = "email_verified", nullable = false)
+	private boolean emailVerified = true;
+
+	@Column(name = "auth_provider", nullable = false, length = 32)
+	private String authProvider = "LOCAL";
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "subscription_tier", nullable = false, length = 16)
+	private SubscriptionTier subscriptionTier = SubscriptionTier.FREE;
+
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private UserProfile profile;
 
@@ -75,5 +91,21 @@ public class User extends AuditableEntity {
 
 	public void changePasswordHash(String passwordHash) {
 		this.passwordHash = passwordHash;
+	}
+
+	public void changeRole(UserRole role) {
+		this.role = role;
+	}
+
+	public void markEmailVerified() {
+		this.emailVerified = true;
+	}
+
+	public void changeAuthProvider(String authProvider) {
+		this.authProvider = authProvider;
+	}
+
+	public void changeSubscriptionTier(SubscriptionTier subscriptionTier) {
+		this.subscriptionTier = subscriptionTier;
 	}
 }

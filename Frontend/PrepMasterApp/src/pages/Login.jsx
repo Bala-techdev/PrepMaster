@@ -152,8 +152,12 @@ export default function Login() {
               {submitting ? 'Signing in…' : 'Sign in'}
               {!submitting && <ArrowRight size={16} aria-hidden="true" />}
             </button>
+            <a className="btn btn-secondary auth-submit" href="/oauth2/authorization/google">
+              Continue with Google
+            </a>
           </form>
 
+          <p className="auth-switch"><Link to="/forgot-password">Forgot password?</Link></p>
           <p className="auth-switch">
             New to PrepMaster? <Link to="/register">Create an account</Link>
           </p>

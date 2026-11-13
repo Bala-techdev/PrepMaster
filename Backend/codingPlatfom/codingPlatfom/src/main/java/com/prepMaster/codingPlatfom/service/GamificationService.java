@@ -19,11 +19,17 @@ public class GamificationService {
 	private final UserStreakService streaks;
 	private final LearningCategoryRepository categories;
 	private final DSAQuestionRepository questions;
+	private final AchievementService achievements;
+	private final NotificationService notifications;
+	private final LeaderboardCacheService leaderboardCache;
 	public GamificationService(TaskCompletionRepository completions, UserProgressRepository progress, UserActivityRepository activity,
 			UserService users, DailyPlanService plans, UserStreakService streaks, DailyPlanRepository plansForUser,
-			LearningCategoryRepository categories, DSAQuestionRepository questions) {
+			LearningCategoryRepository categories, DSAQuestionRepository questions, AchievementService achievements,
+			NotificationService notifications, LeaderboardCacheService leaderboardCache) {
 		this.completions = completions; this.progress = progress; this.activity = activity; this.users = users; this.plans = plans; this.streaks = streaks; this.plansForUser = plansForUser;
-		this.categories = categories; this.questions = questions;
+		this.categories = categories; this.questions = questions; this.achievements = achievements;
+		this.notifications = notifications;
+		this.leaderboardCache = leaderboardCache;
 	}
 	public Completion complete(Long userId, Long taskId) {
 		TaskCompletion prior = completions.findByUserIdAndTaskId(userId, taskId).orElse(null);
@@ -37,7 +43,19 @@ public class GamificationService {
 		p.award(task.getXpReward(), levelFor(newXp));
 		UserActivity a = activity.findByUserIdAndActivityDate(userId, date).orElseGet(() -> activity.save(new UserActivity(user, date)));
 		a.record(task.getXpReward()); streaks.recordActivity(userId, date);
+		leaderboardCache.recordXp(userId, p.getTotalXp(), date);
 		task.getPlan().getTasks().stream().filter(t -> t.getTaskOrder() == task.getTaskOrder() + 1).findFirst().ifPresent(DailyPlanTask::unlock);
+		notifications.create(userId, com.prepMaster.codingPlatfom.entity.enums.NotificationType.TASK_COMPLETED,
+				"Task completed", "\"" + task.getTitle() + "\" earned " + task.getXpReward() + " XP.",
+				"/daily-plan", "TASK:" + taskId);
+		int currentStreak = user.getStreak() == null ? 0 : user.getStreak().getCurrentStreak();
+		if (currentStreak == 7 || currentStreak == 30) {
+			notifications.create(userId, com.prepMaster.codingPlatfom.entity.enums.NotificationType.STREAK,
+					currentStreak + "-day streak", "You have completed learning activity " + currentStreak
+							+ " days in a row. Keep it going.",
+					"/daily-plan", "STREAK:" + currentStreak);
+		}
+		achievements.evaluateAndAward(userId);
 		return new Completion(taskId, saved.getCompletedAt(), saved.getXpAwarded());
 	}
 	@Transactional(readOnly = true)

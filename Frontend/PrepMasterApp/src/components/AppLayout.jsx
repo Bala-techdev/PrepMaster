@@ -8,12 +8,15 @@ import {
 import {
   Bell,
   BookOpen,
+  FileSearch,
   Calendar,
   Home,
   LogOut,
   Menu,
   Search,
+  ShieldCheck,
   Settings,
+  Target,
   Terminal,
   TrendingUp,
   User,
@@ -35,11 +38,15 @@ const primaryLinks = [
   { to: '/progress', label: 'Progress', icon: TrendingUp },
   { to: '/learn', label: 'Learn', icon: BookOpen },
   { to: '/community', label: 'Community', icon: Users },
+  { to: '/resume-scanner', label: 'Resume Scanner', icon: FileSearch },
 ]
 
 const secondaryLinks = [
   { to: '/profile', label: 'Profile', icon: User },
   { to: '/settings', label: 'Settings', icon: Settings },
+  { to: '/security', label: 'Security', icon: ShieldCheck },
+  { to: '/scan-history', label: 'Scan History', icon: FileSearch },
+  { to: '/skill-gaps', label: 'Skill Gaps', icon: Target },
 ]
 
 function SidebarLink({ to, label, icon: Icon, end, onNavigate }) {

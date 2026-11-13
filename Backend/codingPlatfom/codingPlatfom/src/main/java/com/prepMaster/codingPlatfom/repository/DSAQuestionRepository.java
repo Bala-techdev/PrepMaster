@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import com.prepMaster.codingPlatfom.entity.DSAQuestion;
 import com.prepMaster.codingPlatfom.entity.enums.Difficulty;
 
+import java.util.List;
+
 public interface DSAQuestionRepository extends JpaRepository<DSAQuestion, Long> {
 	@Query("select distinct q from DSAQuestion q join fetch q.topic t join fetch t.category c left join fetch q.tags " +
 			"where q.active = true and (:difficulty is null or q.difficulty = :difficulty) " +
@@ -22,4 +24,7 @@ public interface DSAQuestionRepository extends JpaRepository<DSAQuestion, Long> 
 	java.util.Optional<DSAQuestion> findByIdAndActiveTrue(Long id);
 
 	long countByTopicCategoryIdAndActiveTrue(Long categoryId);
+
+	@Query("select q from DSAQuestion q join fetch q.topic t join fetch t.category c where q.active = true order by q.id")
+	List<DSAQuestion> findAllActiveForInterview();
 }

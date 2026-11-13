@@ -5,9 +5,12 @@ import {
   useRef,
   useState,
 } from 'react'
-import { getMe, updateProfile as updateProfileRequest, updateSettings as updateSettingsRequest } from '../api/userService'
 import {
-  getAchievements,
+  getMe,
+  updateProfile as updateProfileRequest,
+  updateSettings as updateSettingsRequest,
+} from '../api/userService'
+import {
   getActivity,
   getCategoryProgress,
   getProgress,
@@ -20,6 +23,13 @@ import {
 } from '../api/learningService'
 import { generatePlan, getTodayPlan } from '../api/dailyPlanService'
 import { completeTask as completeTaskRequest } from '../api/taskService'
+import { getAchievementOverview } from '../api/achievementService'
+import {
+  getNotifications,
+  getUnreadNotificationCount,
+  markAllNotificationsRead as markAllNotificationsReadRequest,
+  markNotificationRead as markNotificationReadRequest,
+} from '../api/notificationService'
 import { addDays, dateKey } from '../lib/date'
 import { applyThemePreference } from '../lib/theme'
 import { AppDataContext } from './useAppData'
@@ -27,6 +37,7 @@ import { AppDataContext } from './useAppData'
 const DEFAULT_TASK_COUNT = 5
 const ACTIVITY_DAYS = 365
 const QUESTION_PAGE_SIZE = 200
+const NOTIFICATION_PREVIEW_SIZE = 6
 
 const categoryStyle = {
   'data-structures-algorithms': { icon: 'Folder', color: 'var(--prem-blue)' },
@@ -40,6 +51,13 @@ const emptySettings = {
   dailyGoalMinutes: 60,
   reminderTime: null,
   timezone: 'UTC',
+  notificationInAppEnabled: true,
+  notificationTasks: true,
+  notificationAchievements: true,
+  notificationStreaks: true,
+  notificationCommunity: true,
+  notificationMockInterviews: true,
+  notificationReminders: true,
 }
 
 const emptyProgress = {
@@ -50,6 +68,12 @@ const emptyProgress = {
   longestStreak: 0,
   totalXp: 0,
   currentLevel: 1,
+}
+
+const emptyAchievements = {
+  achievements: [],
+  earnedCount: 0,
+  totalCount: 0,
 }
 
 async function fetchAllQuestions() {
@@ -68,73 +92,20 @@ async function fetchAllQuestions() {
   }
 }
 
-function buildNotifications({ totalTasks, completedCount, solvedCount, totalQuestions, currentStreak }) {
-  const items = []
-  const remaining = Math.max(0, totalTasks - completedCount)
-
-  if (totalTasks > 0) {
-    items.push(
-      remaining > 0
-        ? {
-            id: 'daily-plan',
-            title: 'Daily plan',
-            message: `${remaining} task${remaining === 1 ? '' : 's'} left today. Keep the streak alive.`,
-            to: '/daily-plan',
-          }
-        : {
-            id: 'daily-plan',
-            title: 'Daily plan complete',
-            message: 'Every task in today’s plan is complete.',
-            to: '/daily-plan',
-          },
-    )
-  }
-
-  items.push({
-    id: 'progress',
-    title: 'Practice progress',
-    message: `${solvedCount} of ${totalQuestions} questions recorded as solved.`,
-    to: '/progress',
-  })
-
-  if (currentStreak > 0) {
-    items.push({
-      id: 'streak',
-      title: `${currentStreak}-day streak`,
-      message: 'Complete one more task today to extend your backend-recorded streak.',
-      to: '/daily-plan',
-    })
-  }
-
-  return items
-}
-
-function achievementIsEarned(code, context) {
-  switch (code) {
-    case 'FIRST_TASK':
-      return context.tasksCompleted > 0
-    case 'STREAK_7':
-      return context.currentStreak >= 7
-    case 'XP_1000':
-      return context.totalXp >= 1000
-    case 'CATEGORY_EXPLORER':
-      return context.activeCategories > 1
-    case 'CONSISTENT_LEARNER':
-      return context.totalActiveDays >= 10
-    default:
-      return false
-  }
-}
-
 export function AppDataProvider({ children }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState(null)
   const [completingTaskId, setCompletingTaskId] = useState(null)
+  const [notificationItems, setNotificationItems] = useState([])
+  const [notificationUnreadCount, setNotificationUnreadCount] = useState(0)
+  const [notificationsLoading, setNotificationsLoading] = useState(false)
+  const [notificationsError, setNotificationsError] = useState(null)
   const completingRef = useRef(false)
   const started = useRef(false)
   const requestId = useRef(0)
+  const notificationsRequestId = useRef(0)
 
   const load = useCallback(async ({ silent = false, ensurePlan = true } = {}) => {
     const id = requestId.current + 1
@@ -156,7 +127,7 @@ export function AppDataProvider({ children }) {
         questionData,
         categoryProgress,
         solvedQuestions,
-        achievements,
+        achievementOverview,
         activity,
       ] = await Promise.all([
         getMe(),
@@ -166,7 +137,7 @@ export function AppDataProvider({ children }) {
         fetchAllQuestions(),
         getCategoryProgress(),
         getSolvedQuestions(),
-        getAchievements(),
+        getAchievementOverview(),
         getActivity(from, to),
       ])
 
@@ -190,7 +161,11 @@ export function AppDataProvider({ children }) {
         questionTotal: questionData.totalElements,
         categoryProgress,
         solvedQuestions,
-        achievements,
+        achievements: achievementOverview?.achievements || [],
+        achievementSummary: {
+          earnedCount: Number(achievementOverview?.earnedCount) || 0,
+          totalCount: Number(achievementOverview?.totalCount) || 0,
+        },
         activity,
         plan,
         loadedAt: new Date().toISOString(),
@@ -213,15 +188,68 @@ export function AppDataProvider({ children }) {
     }
   }, [])
 
+  const loadNotifications = useCallback(async ({ silent = false } = {}) => {
+    const id = notificationsRequestId.current + 1
+    notificationsRequestId.current = id
+
+    if (!silent) setNotificationsLoading(true)
+    setNotificationsError(null)
+
+    try {
+      const [page, unread] = await Promise.all([
+        getNotifications({ page: 0, size: NOTIFICATION_PREVIEW_SIZE }),
+        getUnreadNotificationCount(),
+      ])
+
+      if (notificationsRequestId.current === id) {
+        setNotificationItems(page?.content || [])
+        setNotificationUnreadCount(Number(unread?.count) || 0)
+        setNotificationsLoading(false)
+      }
+    } catch (notificationError) {
+      if (notificationsRequestId.current === id) {
+        setNotificationsLoading(false)
+        setNotificationsError(notificationError)
+      }
+      throw notificationError
+    }
+  }, [])
+
   useEffect(() => {
     if (started.current) return
     started.current = true
     load().catch(() => {
       /* The provider exposes the error so the shell can render a retry state. */
     })
-  }, [load])
+    loadNotifications({ silent: true }).catch(() => {
+      /* Notification failures do not block the main workspace. */
+    })
+  }, [load, loadNotifications])
 
-  const refresh = useCallback(() => load({ silent: false }), [load])
+  const refresh = useCallback(async () => {
+    const next = await load({ silent: false })
+    loadNotifications({ silent: true }).catch(() => {})
+    return next
+  }, [load, loadNotifications])
+
+  const markNotificationRead = useCallback(async (notificationId) => {
+    const updated = await markNotificationReadRequest(notificationId)
+    setNotificationItems((current) =>
+      current.map((item) => (item.id === updated.id ? updated : item)),
+    )
+    setNotificationUnreadCount((current) => Math.max(0, current - 1))
+    return updated
+  }, [])
+
+  const markAllNotificationsRead = useCallback(async () => {
+    const result = await markAllNotificationsReadRequest()
+    const readAt = new Date().toISOString()
+    setNotificationItems((current) =>
+      current.map((item) => (item.read ? item : { ...item, read: true, readAt })),
+    )
+    setNotificationUnreadCount(Number(result?.count) || 0)
+    return result
+  }, [])
 
   const profile = data?.me?.profile || null
   const settings = data?.me?.settings || emptySettings
@@ -231,7 +259,8 @@ export function AppDataProvider({ children }) {
   const questions = data?.questions || []
   const categoryProgress = data?.categoryProgress || []
   const solvedQuestions = data?.solvedQuestions || []
-  const achievements = data?.achievements || []
+  const achievements = data?.achievements || emptyAchievements.achievements
+  const achievementSummary = data?.achievementSummary || emptyAchievements
   const activityRows = data?.activity || []
   const plan = data?.plan || null
 
@@ -391,25 +420,6 @@ export function AppDataProvider({ children }) {
       activity,
     }
 
-    const achievementsView = achievements.map((achievement) => ({
-      ...achievement,
-      earned: achievementIsEarned(achievement.code, {
-        tasksCompleted: stats.tasksCompleted,
-        currentStreak: stats.currentStreak,
-        totalXp: stats.totalXp,
-        totalActiveDays: stats.totalActiveDays,
-        activeCategories: categoryProgress.filter((item) => item.completedTasks > 0).length,
-      }),
-    }))
-
-    const notifications = buildNotifications({
-      totalTasks,
-      completedCount,
-      solvedCount,
-      totalQuestions,
-      currentStreak: stats.currentStreak,
-    })
-
     return {
       categoryById,
       categoryViews,
@@ -420,10 +430,19 @@ export function AppDataProvider({ children }) {
       planTasks,
       solvedQuestionsView,
       topicPerformance,
-      achievementsView,
-      notifications,
     }
-  }, [activityRows, categories, categoryProgress, data?.me?.streak?.totalActiveDays, data?.questionTotal, plan, progress, questions, solvedQuestions, topics])
+  }, [
+    activityRows,
+    categories,
+    categoryProgress,
+    data?.me?.streak?.totalActiveDays,
+    data?.questionTotal,
+    plan,
+    progress,
+    questions,
+    solvedQuestions,
+    topics,
+  ])
 
   const completeTask = useCallback(
     async (taskId) => {
@@ -438,6 +457,7 @@ export function AppDataProvider({ children }) {
 
         try {
           await load({ silent: true, ensurePlan: true })
+          loadNotifications({ silent: true }).catch(() => {})
         } catch {
           return {
             ok: true,
@@ -458,7 +478,7 @@ export function AppDataProvider({ children }) {
         setCompletingTaskId(null)
       }
     },
-    [load],
+    [load, loadNotifications],
   )
 
   const updateProfile = useCallback(async (payload) => {
@@ -471,15 +491,19 @@ export function AppDataProvider({ children }) {
     return updated
   }, [])
 
-  const updateSettings = useCallback(async (payload) => {
-    const updated = await updateSettingsRequest(payload)
-    setData((current) =>
-      current
-        ? { ...current, me: { ...current.me, settings: updated } }
-        : current,
-    )
-    return updated
-  }, [])
+  const updateSettings = useCallback(
+    async (payload) => {
+      const updated = await updateSettingsRequest(payload)
+      setData((current) =>
+        current
+          ? { ...current, me: { ...current.me, settings: updated } }
+          : current,
+      )
+      loadNotifications({ silent: true }).catch(() => {})
+      return updated
+    },
+    [loadNotifications],
+  )
 
   useEffect(() => {
     const preference = settings.theme || 'SYSTEM'
@@ -494,6 +518,8 @@ export function AppDataProvider({ children }) {
     media.addEventListener('change', onChange)
     return () => media.removeEventListener('change', onChange)
   }, [settings.theme])
+
+  const notificationsEnabled = settings.notificationInAppEnabled !== false
 
   const value = useMemo(
     () => ({
@@ -512,12 +538,19 @@ export function AppDataProvider({ children }) {
       questionTotal: Number(data?.questionTotal) || questions.length,
       categoryProgress,
       solvedQuestions: derived.solvedQuestionsView,
-      achievements: derived.achievementsView,
+      achievements,
+      achievementSummary,
       topicPerformance: derived.topicPerformance,
       activity: derived.stats.activity,
       stats: derived.stats,
-      notifications: derived.notifications,
-      notificationsEnabled: settings.emailNotifications,
+      notifications: notificationItems,
+      notificationUnreadCount,
+      notificationsLoading,
+      notificationsError,
+      notificationsEnabled,
+      loadNotifications,
+      markNotificationRead,
+      markAllNotificationsRead,
       loading,
       refreshing,
       ready: Boolean(data),
@@ -529,12 +562,24 @@ export function AppDataProvider({ children }) {
       refresh,
     }),
     [
+      achievementSummary,
+      achievements,
+      categoryProgress,
       completeTask,
       completingTaskId,
       data?.me,
+      data?.questionTotal,
       derived,
       error,
+      loadNotifications,
       loading,
+      markAllNotificationsRead,
+      markNotificationRead,
+      notificationItems,
+      notificationUnreadCount,
+      notificationsEnabled,
+      notificationsError,
+      notificationsLoading,
       plan,
       profile,
       questions,
@@ -544,7 +589,6 @@ export function AppDataProvider({ children }) {
       topics,
       updateProfile,
       updateSettings,
-      categoryProgress,
     ],
   )
 
