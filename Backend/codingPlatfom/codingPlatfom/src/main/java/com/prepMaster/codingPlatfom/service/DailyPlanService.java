@@ -35,6 +35,12 @@ public class DailyPlanService {
 		}
 		return plan(plans.save(daily));
 	}
+	@Transactional(readOnly = true) public Plan today(Long userId) {
+		User user = users.require(userId);
+		LocalDate date = LocalDate.now(ZoneId.of(user.getSettings().getTimezone()));
+		return plans.findByUserIdAndPlanDate(userId, date).map(this::plan)
+				.orElseThrow(() -> new ResourceNotFoundException("No daily plan exists for " + date));
+	}
 	@Transactional(readOnly = true) public Plan get(Long userId, Long planId) {
 		DailyPlan p = plans.findById(planId).orElseThrow(() -> new ResourceNotFoundException("Plan not found: " + planId));
 		if (!p.getUser().getId().equals(userId)) throw new ResourceNotFoundException("Plan not found: " + planId);
@@ -44,5 +50,10 @@ public class DailyPlanService {
 		return tasks.findByIdAndPlanUserId(taskId, userId).orElseThrow(() -> new ResourceNotFoundException("Task not found: " + taskId));
 	}
 	private int xp(DSAQuestion q) { return switch (q.getDifficulty()) { case EASY -> 10; case MEDIUM -> 25; case HARD -> 50; }; }
-	private Plan plan(DailyPlan p) { return new Plan(p.getId(), p.getPlanDate(), p.getTimezone(), p.getTasks().stream().map(t -> new Task(t.getId(), t.getTaskOrder(), t.getTitle(), t.getCategory().getId(), t.getStatus(), t.getXpReward())).toList()); }
+	private Plan plan(DailyPlan p) { return new Plan(p.getId(), p.getPlanDate(), p.getTimezone(), p.getTasks().stream()
+			.map(t -> new Task(t.getId(), t.getTaskOrder(), t.getTitle(), t.getCategory().getId(),
+					t.getQuestion() == null ? null : t.getQuestion().getId(),
+					t.getQuestion() == null ? null : t.getQuestion().getDifficulty(),
+					t.getStatus(), t.getXpReward()))
+			.toList()); }
 }

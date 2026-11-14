@@ -17,6 +17,8 @@ public record RegisterRequest(
 		@Size(min = 8, max = 72, message = "password must be between 8 and 72 characters")
 		@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$",
 				message = "password must contain upper-case, lower-case and numeric characters")
-		String password
+		String password,
+		@Size(max = 72, message = "confirmPassword must be at most 72 characters")
+		String confirmPassword
 ) {
 }

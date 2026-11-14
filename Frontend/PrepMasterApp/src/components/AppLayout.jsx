@@ -2,16 +2,21 @@ import { useEffect, useRef, useState } from 'react'
 import {
   Link,
   NavLink,
+  Outlet,
   useNavigate,
 } from 'react-router-dom'
 import {
   Bell,
   BookOpen,
+  FileSearch,
   Calendar,
   Home,
+  LogOut,
   Menu,
   Search,
+  ShieldCheck,
   Settings,
+  Target,
   Terminal,
   TrendingUp,
   User,
@@ -20,7 +25,9 @@ import {
   Zap,
 } from 'lucide-react'
 import avatarSrc from '../assets/placeholder-avatar.svg'
-import { useAppState } from '../state/appContext'
+import { useAuth } from '../auth/useAuth'
+import { useAppData } from '../state/useAppData'
+import PageState from './PageState'
 import './AppLayout.css'
 
 const primaryLinks = [
@@ -31,11 +38,15 @@ const primaryLinks = [
   { to: '/progress', label: 'Progress', icon: TrendingUp },
   { to: '/learn', label: 'Learn', icon: BookOpen },
   { to: '/community', label: 'Community', icon: Users },
+  { to: '/resume-scanner', label: 'Resume Scanner', icon: FileSearch },
 ]
 
 const secondaryLinks = [
   { to: '/profile', label: 'Profile', icon: User },
   { to: '/settings', label: 'Settings', icon: Settings },
+  { to: '/security', label: 'Security', icon: ShieldCheck },
+  { to: '/scan-history', label: 'Scan History', icon: FileSearch },
+  { to: '/skill-gaps', label: 'Skill Gaps', icon: Target },
 ]
 
 function SidebarLink({ to, label, icon: Icon, end, onNavigate }) {
@@ -52,8 +63,19 @@ function SidebarLink({ to, label, icon: Icon, end, onNavigate }) {
   )
 }
 
-export default function AppLayout({ children }) {
-  const { profile, notifications, notificationsEnabled, stats } = useAppState()
+export default function AppLayout() {
+  const { logout, user: authUser } = useAuth()
+  const {
+    user,
+    profile,
+    stats,
+    notifications,
+    notificationsEnabled,
+    loading,
+    ready,
+    error,
+    refresh,
+  } = useAppData()
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
@@ -61,7 +83,20 @@ export default function AppLayout({ children }) {
   const [avatarFailed, setAvatarFailed] = useState(false)
   const notificationRef = useRef(null)
 
-  /* Lock scrolling and support Escape while the drawer is open. */
+  const displayName =
+    profile?.displayName ||
+    authUser?.displayName ||
+    user?.username ||
+    authUser?.email ||
+    'PrepMaster user'
+  const avatarUrl = profile?.avatarUrl || ''
+  const initial = displayName.charAt(0).toUpperCase() || 'P'
+  const currentStreak = stats?.currentStreak || 0
+
+  useEffect(() => {
+    setAvatarFailed(false)
+  }, [avatarUrl])
+
   useEffect(() => {
     if (!isMenuOpen) return undefined
 
@@ -79,7 +114,6 @@ export default function AppLayout({ children }) {
     }
   }, [isMenuOpen])
 
-  /* Reset the drawer if the viewport grows back to desktop. */
   useEffect(() => {
     const mediaQuery = window.matchMedia('(min-width: 1025px)')
     const onChange = (event) => {
@@ -115,7 +149,6 @@ export default function AppLayout({ children }) {
   }, [isNotificationsOpen])
 
   const closeMenu = () => setIsMenuOpen(false)
-  const initial = profile.name.charAt(0).toUpperCase() || 'P'
 
   const handleSearch = (event) => {
     event.preventDefault()
@@ -123,6 +156,18 @@ export default function AppLayout({ children }) {
     navigate(clean ? `/practice?q=${encodeURIComponent(clean)}` : '/practice')
     setQuery('')
     closeMenu()
+  }
+
+  const handleLogout = () => {
+    closeMenu()
+    logout()
+    navigate('/login', { replace: true })
+  }
+
+  const retry = () => {
+    refresh().catch(() => {
+      /* The provider keeps the error state for display. */
+    })
   }
 
   return (
@@ -173,8 +218,18 @@ export default function AppLayout({ children }) {
                 onNavigate={closeMenu}
               />
             ))}
+            <button
+              type="button"
+              className="nav-link logout-link"
+              onClick={handleLogout}
+            >
+              <LogOut className="nav-icon" aria-hidden="true" />
+              <span>Sign out</span>
+            </button>
             <p className="sidebar-note">
-              Keep the {stats.currentStreak}-day streak alive.
+              {currentStreak > 0
+                ? `Keep the ${currentStreak}-day backend streak alive.`
+                : 'Complete a task to start your streak.'}
             </p>
           </div>
         </aside>
@@ -293,9 +348,18 @@ export default function AppLayout({ children }) {
               <Link
                 to="/profile"
                 className="user-profile"
-                aria-label={`Open profile for ${profile.name}`}
+                aria-label={`Open profile for ${displayName}`}
               >
-                {avatarFailed ? (
+                {avatarUrl && !avatarFailed ? (
+                  <img
+                    src={avatarUrl}
+                    alt=""
+                    className="user-avatar"
+                    width={32}
+                    height={32}
+                    onError={() => setAvatarFailed(true)}
+                  />
+                ) : avatarFailed ? (
                   <span className="avatar-fallback" aria-hidden="true">
                     {initial}
                   </span>
@@ -309,13 +373,39 @@ export default function AppLayout({ children }) {
                     onError={() => setAvatarFailed(true)}
                   />
                 )}
-                <span className="user-name">{profile.name}</span>
+                <span className="user-name">{displayName}</span>
               </Link>
             </div>
           </header>
 
           <main className="main-content" id="main-content">
-            {children}
+            {!ready && loading && (
+              <PageState
+                variant="loading"
+                title="Loading your workspace"
+                description="Fetching your account, today’s plan and learning progress."
+              />
+            )}
+
+            {!ready && !loading && error && (
+              <PageState
+                variant="error"
+                title="Your workspace could not be loaded"
+                description={error.message}
+                onRetry={retry}
+              />
+            )}
+
+            {ready && error && (
+              <p className="app-error-banner" role="alert">
+                {error.message}{' '}
+                <button type="button" className="app-error-retry" onClick={retry}>
+                  Retry
+                </button>
+              </p>
+            )}
+
+            {ready && <Outlet />}
           </main>
         </div>
 

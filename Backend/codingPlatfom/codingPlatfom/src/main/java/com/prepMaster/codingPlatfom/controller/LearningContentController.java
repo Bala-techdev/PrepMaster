@@ -20,11 +20,14 @@ public class LearningContentController {
 	@PutMapping("/categories/{id}") public Category updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest r) { return service.updateCategory(id, r); }
 	@DeleteMapping("/categories/{id}") @ResponseStatus(HttpStatus.NO_CONTENT) public void deleteCategory(@PathVariable Long id) { service.deleteCategory(id); }
 	@GetMapping("/categories/{id}/topics") public java.util.List<Topic> topics(@PathVariable Long id) { return service.topics(id); }
+	@GetMapping("/topics") public java.util.List<Topic> allTopics() { return service.allTopics(); }
 	@PostMapping("/topics") @ResponseStatus(HttpStatus.CREATED) public Topic topic(@Valid @RequestBody TopicRequest r) { return service.createTopic(r); }
 	@GetMapping("/topics/{id}/resources") public java.util.List<Resource> resources(@PathVariable Long id) { return service.resources(id); }
 	@PostMapping("/resources") @ResponseStatus(HttpStatus.CREATED) public Resource resource(@Valid @RequestBody ResourceRequest r) { return service.createResource(r); }
 	@PostMapping("/tags") @ResponseStatus(HttpStatus.CREATED) public Tag tag(@Valid @RequestBody TagRequest r) { return service.createTag(r); }
 	@GetMapping("/questions") public Page<Question> questions(@RequestParam(required = false) Difficulty difficulty,
-			@RequestParam(required = false) Long topicId, Pageable pageable) { return service.questions(difficulty, topicId, pageable); }
+			@RequestParam(required = false) Long topicId, @RequestParam(required = false) String search,
+			Pageable pageable) { return service.questions(difficulty, topicId, search, pageable); }
+	@GetMapping("/questions/{id}") public Question question(@PathVariable Long id) { return service.question(id); }
 	@PostMapping("/questions") @ResponseStatus(HttpStatus.CREATED) public Question question(@Valid @RequestBody QuestionRequest r) { return service.createQuestion(r); }
 }

@@ -13,8 +13,10 @@ import ProgressBar from '../components/ProgressBar'
 import LevelCard from '../components/LevelCard'
 import ActivityHeatmap from '../components/ActivityHeatmap'
 import StreakCard from '../components/StreakCard'
+import { useAppData } from '../state/useAppData'
 import { useAppState } from '../state/appContext'
 import { msUntilMidnight, pad } from '../lib/date'
+import { getArenaOverview } from '../api/arenaService'
 import './Dashboard.css'
 
 const padValue = (value) => pad(value)
@@ -28,9 +30,11 @@ function formatToday() {
 }
 
 export default function Dashboard() {
-  const { profile, dailyTasks, stats } = useAppState()
+  const { profile, tasks, stats, settings } = useAppData()
+  const { interviews } = useAppState()
   const [remainingMs, setRemainingMs] = useState(msUntilMidnight)
   const [today, setToday] = useState(formatToday)
+  const [arena, setArena] = useState(null)
 
   useEffect(() => {
     const tick = () => {
@@ -45,6 +49,14 @@ export default function Dashboard() {
     return () => window.clearInterval(timer)
   }, [])
 
+  useEffect(() => {
+    let active = true
+    getArenaOverview()
+      .then((data) => active && setArena(data))
+      .catch(() => {})
+    return () => { active = false }
+  }, [])
+
   const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000))
   const countdown = {
     hours: Math.floor(totalSeconds / 3600),
@@ -52,15 +64,16 @@ export default function Dashboard() {
     seconds: totalSeconds % 60,
   }
 
-  const remainingTasks = stats.totalTasks - stats.completedCount
-  const firstName = profile.name.split(' ')[0] || profile.name
+  const remainingTasks = Math.max(0, stats.totalTasks - stats.completedCount)
+  const displayName = profile?.displayName || 'there'
+  const firstName = displayName.split(' ')[0] || displayName
 
   const quickActions = [
     {
       to: '/mock-interview',
       label: 'Mock interviews',
-      value: stats.interviewCount
-        ? `${stats.interviewCount} recorded`
+      value: interviews.length
+        ? `${interviews.length} recorded locally`
         : 'Start your first',
       icon: Trophy,
       tone: 'indigo',
@@ -75,7 +88,7 @@ export default function Dashboard() {
     {
       to: '/practice',
       label: 'Problems solved',
-      value: `${stats.solvedCount} marked`,
+      value: `${stats.solvedCount} recorded`,
       icon: Target,
       tone: 'amber',
     },
@@ -107,14 +120,18 @@ export default function Dashboard() {
               <div>
                 <p className="blueprint-eyebrow">Today&apos;s blueprint</p>
                 <h2 className="blueprint-title" id="blueprint-title">
-                  {remainingTasks === 0
-                    ? 'All tasks complete'
-                    : `${remainingTasks} task${remainingTasks === 1 ? '' : 's'} left today`}
+                  {stats.totalTasks === 0
+                    ? 'No plan for today'
+                    : remainingTasks === 0
+                      ? 'All tasks complete'
+                      : `${remainingTasks} task${remainingTasks === 1 ? '' : 's'} left today`}
                 </h2>
                 <p className="blueprint-description">
-                  {remainingTasks === 0
-                    ? 'Every task is done. Revisit any of them from the daily plan.'
-                    : 'Finish today’s plan to keep your streak alive.'}
+                  {stats.totalTasks === 0
+                    ? 'Your daily plan could not be loaded. Retry from the banner above.'
+                    : remainingTasks === 0
+                      ? 'Every task is done. Revisit any of them from the daily plan.'
+                      : 'Finish today’s plan to keep your streak alive.'}
                 </p>
               </div>
               <Link to="/daily-plan" className="blueprint-cta">
@@ -124,7 +141,7 @@ export default function Dashboard() {
             </div>
 
             <ul className="blueprint-tasks">
-              {dailyTasks.map((task) => (
+              {tasks.map((task) => (
                 <li
                   key={task.id}
                   className={task.isCompleted ? 'is-done' : ''}
@@ -171,9 +188,11 @@ export default function Dashboard() {
               percentage={stats.percentage}
             />
             <p className="card-footnote" role="status">
-              {remainingTasks === 0
-                ? 'Plan complete — your activity is recorded for today.'
-                : `${remainingTasks} task${remainingTasks === 1 ? '' : 's'} remaining in today’s plan.`}
+              {stats.totalTasks === 0
+                ? 'No daily plan is available yet.'
+                : remainingTasks === 0
+                  ? 'Plan complete — your activity is recorded for today.'
+                  : `${remainingTasks} task${remainingTasks === 1 ? '' : 's'} remaining in today’s plan.`}
             </p>
           </section>
 
@@ -186,7 +205,9 @@ export default function Dashboard() {
                 <h2 className="card-title" id="countdown-title">
                   Time until midnight
                 </h2>
-                <p className="card-subtitle">Your streak resets at 00:00 local time</p>
+                <p className="card-subtitle">
+                  Browser-local time · plan timezone {settings.timezone || 'UTC'}
+                </p>
               </div>
               <Clock className="card-head-icon" size={18} aria-hidden="true" />
             </div>
@@ -230,8 +251,22 @@ export default function Dashboard() {
             activity={stats.activity}
             days={30}
             className="dashboard-span-4"
-            note="Prototype history: earlier days are deterministic demo activity. Today’s cell changes only when you complete a task."
+            note="Activity is recorded by the backend when you complete a daily-plan task. A day with no completed tasks stays empty."
           />
+
+          {arena && (
+            <section className="daily-progress-card dashboard-span-4" aria-labelledby="arena-progress-title">
+              <div className="card-head">
+                <div>
+                  <h2 className="card-title" id="arena-progress-title">DSA Arena</h2>
+                  <p className="card-subtitle">{arena.levelName} · {arena.totalXp} XP · {arena.solvedProblems} solved</p>
+                </div>
+                <Link to="/practice" className="btn btn-secondary">Practice</Link>
+              </div>
+              <ProgressBar label="Current level" percentage={Math.min(100, (arena.totalXp % 1000) / 10)} />
+              {arena.recommendations?.length > 0 && <p className="card-footnote">Recommended next: {arena.recommendations[0].title}</p>}
+            </section>
+          )}
 
           <nav className="quick-actions" aria-label="Quick actions">
             {quickActions.map((action) => {

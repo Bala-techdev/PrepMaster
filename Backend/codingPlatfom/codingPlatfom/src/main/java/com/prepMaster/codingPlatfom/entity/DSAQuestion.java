@@ -25,6 +25,7 @@ public class DSAQuestion extends AuditableEntity {
 	@Column(name = "expected_time_complexity", length = 80) private String expectedTimeComplexity;
 	@Column(name = "expected_space_complexity", length = 80) private String expectedSpaceComplexity;
 	@Column(name = "practice_url", length = 1000) private String practiceUrl;
+	@Column(name = "test_cases", columnDefinition = "LONGTEXT") private String testCases;
 	@Column(nullable = false) private boolean active = true;
 	@ManyToMany(fetch = FetchType.LAZY) @JoinTable(name = "dsa_question_tags",
 			joinColumns = @JoinColumn(name = "question_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
@@ -32,9 +33,14 @@ public class DSAQuestion extends AuditableEntity {
 
 	public DSAQuestion(LearningTopic topic, String title, String description, Difficulty difficulty, String constraints,
 			String examples, String time, String space, String practiceUrl, Set<QuestionTag> tags) {
+		this(topic, title, description, difficulty, constraints, examples, time, space, practiceUrl, null, tags);
+	}
+
+	public DSAQuestion(LearningTopic topic, String title, String description, Difficulty difficulty, String constraints,
+			String examples, String time, String space, String practiceUrl, String testCases, Set<QuestionTag> tags) {
 		this.topic = topic; this.title = title; this.description = description; this.difficulty = difficulty;
 		this.constraints = constraints; this.examples = examples; this.expectedTimeComplexity = time;
-		this.expectedSpaceComplexity = space; this.practiceUrl = practiceUrl;
+		this.expectedSpaceComplexity = space; this.practiceUrl = practiceUrl; this.testCases = testCases;
 		if (tags != null) this.tags = new LinkedHashSet<>(tags);
 	}
 }

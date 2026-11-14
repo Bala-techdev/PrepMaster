@@ -17,5 +17,6 @@ public class ProgressController {
 	@GetMapping("/weekly") public Summary weekly(Authentication auth) { LocalDate to = LocalDate.now(); return service.summary(id(auth), to.minusDays(6), to, "WEEK"); }
 	@GetMapping("/monthly") public Summary monthly(Authentication auth) { LocalDate to = LocalDate.now(); return service.summary(id(auth), to.withDayOfMonth(1), to, "MONTH"); }
 	@GetMapping("/categories") public java.util.List<CategoryProgress> categories(Authentication auth) { return service.categoryProgress(id(auth)); }
+	@GetMapping("/questions") public java.util.List<SolvedQuestion> solvedQuestions(Authentication auth) { return service.solvedQuestions(id(auth)); }
 	private long id(Authentication auth) { return Long.parseLong(auth.getName()); }
 }

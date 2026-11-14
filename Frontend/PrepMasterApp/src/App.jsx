@@ -6,7 +6,11 @@ import {
   Routes,
   useLocation,
 } from 'react-router-dom'
+import { AuthProvider } from './auth/AuthContext'
+import { ProtectedRoute, PublicOnly } from './auth/ProtectedRoute'
 import AppLayout from './components/AppLayout'
+import { AppDataProvider } from './state/AppDataContext'
+import { AppStateProvider } from './state/AppStateContext'
 import Dashboard from './pages/Dashboard'
 import DailyPlan from './pages/DailyPlan'
 import Practice from './pages/Practice'
@@ -15,13 +19,23 @@ import MockInterview from './pages/MockInterview'
 import Progress from './pages/Progress'
 import Learn from './pages/Learn'
 import LearnCategory from './pages/LearnCategory'
-import LessonDetail from './pages/LessonDetail'
+import TopicDetail from './pages/TopicDetail'
 import Community from './pages/Community'
 import CommunityDetail from './pages/CommunityDetail'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import VerifyEmail from './pages/VerifyEmail'
+import SecuritySettings from './pages/SecuritySettings'
+import OAuthCallback from './pages/OAuthCallback'
+import ResumeScanner from './pages/ResumeScanner'
+import ResumeScanHistory from './pages/ResumeScanHistory'
+import SkillGapAnalysis from './pages/SkillGapAnalysis'
+import ArenaProblem from './pages/ArenaProblem'
 import NotFound from './pages/NotFound'
-import { AppStateProvider } from './state/AppStateContext'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -33,38 +47,65 @@ function ScrollToTop() {
   return null
 }
 
+function ProtectedWorkspace() {
+  return (
+    <AppDataProvider>
+      <AppLayout />
+    </AppDataProvider>
+  )
+}
+
 function App() {
   return (
     <AppStateProvider>
       <Router>
-        <ScrollToTop />
-        <div className="app-root">
-          <AppLayout>
+        <AuthProvider>
+          <ScrollToTop />
+          <div className="app-root">
             <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/daily-plan" element={<DailyPlan />} />
-              <Route path="/practice" element={<Practice />} />
-              <Route path="/practice/:problemId" element={<ProblemDetail />} />
-              <Route path="/mock-interview" element={<MockInterview />} />
-              <Route path="/progress" element={<Progress />} />
-              <Route path="/learn" element={<Learn />} />
-              <Route path="/learn/:categoryId" element={<LearnCategory />} />
-              <Route
-                path="/learn/:categoryId/:lessonId"
-                element={<LessonDetail />}
-              />
-              <Route path="/community" element={<Community />} />
-              <Route
-                path="/community/:discussionId"
-                element={<CommunityDetail />}
-              />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="*" element={<NotFound />} />
+              <Route element={<PublicOnly />}>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/oauth/callback" element={<OAuthCallback />} />
+              </Route>
+
+              <Route element={<ProtectedRoute />}>
+                <Route element={<ProtectedWorkspace />}>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/daily-plan" element={<DailyPlan />} />
+                  <Route path="/practice" element={<Practice />} />
+                  <Route path="/practice/:problemId" element={<ProblemDetail />} />
+                  <Route path="/arena/:problemId" element={<ArenaProblem />} />
+                  <Route path="/mock-interview" element={<MockInterview />} />
+                  <Route path="/progress" element={<Progress />} />
+                  <Route path="/learn" element={<Learn />} />
+                  <Route path="/learn/:categoryId" element={<LearnCategory />} />
+                  <Route
+                    path="/learn/:categoryId/:topicId"
+                    element={<TopicDetail />}
+                  />
+                  <Route path="/community" element={<Community />} />
+                  <Route path="/resume-scanner" element={<ResumeScanner />} />
+                  <Route path="/resume-scanner/:scanId" element={<ResumeScanner />} />
+                  <Route path="/scan-history" element={<ResumeScanHistory />} />
+                  <Route path="/skill-gaps" element={<SkillGapAnalysis />} />
+                  <Route
+                    path="/community/:discussionId"
+                    element={<CommunityDetail />}
+                  />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/security" element={<SecuritySettings />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+              </Route>
             </Routes>
-          </AppLayout>
-        </div>
+          </div>
+        </AuthProvider>
       </Router>
     </AppStateProvider>
   )

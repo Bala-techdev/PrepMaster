@@ -27,6 +27,24 @@ public record UpdateUserSettingsRequest(
 
 		@NotBlank(message = "timezone is required")
 		@Size(max = 64, message = "timezone must be at most 64 characters")
-		String timezone
+		String timezone,
+
+		Boolean notificationInAppEnabled,
+		Boolean notificationTasks,
+		Boolean notificationAchievements,
+		Boolean notificationStreaks,
+		Boolean notificationCommunity,
+		Boolean notificationMockInterviews,
+		Boolean notificationReminders
 ) {
+
+	/**
+	 * Backwards-compatible constructor for callers written before notification
+	 * preferences existed. Omitted preference fields keep their stored values.
+	 */
+	public UpdateUserSettingsRequest(ThemePreference theme, Boolean emailNotifications, Integer dailyGoalMinutes,
+			LocalTime reminderTime, String timezone) {
+		this(theme, emailNotifications, dailyGoalMinutes, reminderTime, timezone, null, null, null, null, null, null,
+				null);
+	}
 }

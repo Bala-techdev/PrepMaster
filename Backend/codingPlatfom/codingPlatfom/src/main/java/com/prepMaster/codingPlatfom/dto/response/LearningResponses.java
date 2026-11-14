@@ -11,5 +11,5 @@ public final class LearningResponses {
 	public record Tag(Long id, String name, String slug) {}
 	public record Question(Long id, Long topicId, String topicName, String title, String description,
 			Difficulty difficulty, String constraints, String examples, String expectedTimeComplexity,
-			String expectedSpaceComplexity, String practiceUrl, List<Tag> tags) {}
+			String expectedSpaceComplexity, String practiceUrl, String testCases, List<Tag> tags) {}
 }

@@ -13,9 +13,9 @@ import ProgressBar from '../components/ProgressBar'
 import StatCard from '../components/StatCard'
 import ActivityHeatmap from '../components/ActivityHeatmap'
 import EmptyState from '../components/EmptyState'
-import { PROBLEMS } from '../data/problems'
-import { formatDate } from '../lib/date'
+import { useAppData } from '../state/useAppData'
 import { useAppState } from '../state/appContext'
+import { formatDate } from '../lib/date'
 import './Progress.css'
 
 const topicColors = [
@@ -28,7 +28,9 @@ const topicColors = [
 ]
 
 export default function ProgressPage() {
-  const { stats, interviews } = useAppState()
+  const { stats, topicPerformance } = useAppData()
+  const { interviews } = useAppState()
+  const overallPercentage = Math.round((Number(stats.completionRate) || 0) * 100)
 
   return (
     <section className="progress-page">
@@ -38,16 +40,16 @@ export default function ProgressPage() {
             <p className="page-eyebrow">Insights</p>
             <h1 className="page-title">Progress</h1>
             <p className="page-subtitle">
-              Track your local prototype activity and marked learning progress.
+              XP, levels, streaks and solved questions recorded by the backend.
             </p>
           </div>
         </header>
 
         <p className="progress-note" role="note">
-          <strong>Demo history:</strong> the streak, heatmap and base level
-          include deterministic prototype activity. Completed tasks, solved
-          problems, lessons and interview sessions below come from your actions
-          in this browser.
+          <strong>Account-backed history:</strong> plan completion, XP, level,
+          streak and solved-question values are calculated by the backend from
+          completed daily-plan tasks. Mock interview history is still stored in
+          this browser because the backend has no interview endpoints.
         </p>
 
         <div className="progress-top">
@@ -58,33 +60,31 @@ export default function ProgressPage() {
             <div className="card-head">
               <div>
                 <h2 className="card-title" id="overall-progress-title">
-                  Overall progress
+                  Overall plan completion
                 </h2>
                 <p className="card-subtitle">
-                  Today&apos;s plan, solved problems and completed lessons
+                  All daily-plan tasks recorded for your account
                 </p>
               </div>
-              <span className="card-chip">{stats.overallPercentage}%</span>
+              <span className="card-chip">{overallPercentage}%</span>
             </div>
             <ProgressBar
-              label="Combined completion"
-              percentage={stats.overallPercentage}
+              label="Plan completion"
+              percentage={overallPercentage}
             />
             <div className="overall-breakdown">
               <span>
-                Plan {stats.completedCount}/{stats.totalTasks}
+                Plan {stats.tasksCompleted}/{stats.totalPlanTasks}
               </span>
               <span>
-                Problems {stats.solvedCount}/{PROBLEMS.length}
+                Problems {stats.solvedCount}/{stats.totalQuestions}
               </span>
-              <span>
-                Lessons {stats.lessonsDone}/{stats.totalLessons}
-              </span>
+              <span>{stats.totalXp.toLocaleString()} XP</span>
             </div>
             <p className="overall-note">
-              {stats.overallDone} of {stats.overallTotal} trackable items
-              complete. Mark problems solved in Practice and finish lessons in
-              Learn to raise this number.
+              {stats.tasksCompleted} of {stats.totalPlanTasks} generated plan
+              tasks have been completed. Complete tasks in the Daily Plan to
+              raise this number.
             </p>
           </section>
 
@@ -104,7 +104,7 @@ export default function ProgressPage() {
             <StatCard
               title="Completed tasks"
               value={stats.tasksCompleted}
-              subtitle="recorded locally"
+              subtitle="recorded by the backend"
               icon={<CheckCircle />}
             />
           </div>
@@ -114,14 +114,14 @@ export default function ProgressPage() {
           <section className="topic-performance" aria-labelledby="topics-title">
             <div className="section-head progress-section-head">
               <h2 className="section-title" id="topics-title">
-                Topic-wise performance
+                Category performance
               </h2>
               <span className="section-count">
-                {stats.solvedCount}/{PROBLEMS.length} solved
+                {stats.solvedCount}/{stats.totalQuestions} solved
               </span>
             </div>
             <div className="performance-bars">
-              {stats.topicPerformance.map((item, index) => {
+              {topicPerformance.map((item, index) => {
                 const percent = item.total
                   ? Math.round((item.solved / item.total) * 100)
                   : 0
@@ -156,8 +156,8 @@ export default function ProgressPage() {
               })}
             </div>
             <p className="performance-note">
-              Counts update only when you mark a problem solved. They are not
-              judged submissions.
+              Counts update when a daily-plan task containing a question is
+              completed. They are not judged submissions.
             </p>
           </section>
 
@@ -174,7 +174,8 @@ export default function ProgressPage() {
                   <p className="level-progress-value">Level {stats.level}</p>
                   <p className="level-progress-note">
                     {stats.totalXp.toLocaleString()} XP total ·{' '}
-                    {stats.xpIntoLevel} / 1,000 into this level
+                    {stats.xpIntoLevel.toLocaleString()} /{' '}
+                    {stats.levelSpan.toLocaleString()} into this level
                   </p>
                 </div>
                 <span className="level-progress-percent">
@@ -187,8 +188,8 @@ export default function ProgressPage() {
                 small
               />
               <p className="performance-note">
-                XP comes from completed plan tasks, marked problems, lessons and
-                finished mock interviews, on top of the prototype baseline.
+                XP comes from completed daily-plan tasks and is stored by the
+                backend. The frontend only displays the resulting level.
               </p>
             </section>
 
@@ -200,7 +201,7 @@ export default function ProgressPage() {
                 <h2 className="section-title" id="solved-title">
                   Problems solved
                 </h2>
-                <span className="section-count">of {PROBLEMS.length}</span>
+                <span className="section-count">of {stats.totalQuestions}</span>
               </div>
               <div className="statistics-grid">
                 <div className="stat-item">
@@ -252,7 +253,7 @@ export default function ProgressPage() {
           activity={stats.activity}
           days={30}
           className="progress-heatmap"
-          note="Earlier cells are deterministic demo history. Today’s cell reflects real task completions stored in this browser."
+          note="Activity is recorded by the backend when you complete a daily-plan task. Days without a completed task stay empty."
         />
 
         <section
@@ -272,7 +273,7 @@ export default function ProgressPage() {
             <EmptyState
               icon={Trophy}
               title="No mock interviews yet"
-              description="Finish a 45-minute prototype session and its actual interaction summary will appear here."
+              description="Finish a prototype session and its interaction summary will appear here. This history stays in this browser only."
             >
               <Link to="/mock-interview" className="btn btn-primary">
                 Start a mock interview
@@ -315,7 +316,8 @@ export default function ProgressPage() {
           <p className="history-note">
             <ClipboardList size={13} aria-hidden="true" />
             Scores measure how many questions you marked answered, not answer
-            correctness. Sessions are stored only in this browser.
+            correctness. Sessions are stored only in this browser and do not
+            affect backend XP.
           </p>
         </section>
       </div>

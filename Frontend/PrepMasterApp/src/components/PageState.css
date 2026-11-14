@@ -1,0 +1,85 @@
+.page-state {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: min(640px, 100%);
+  margin: clamp(24px, 6vh, 64px) auto;
+  padding: 22px;
+  background: var(--prem-card);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-lg);
+  box-shadow: var(--prem-shadow-sm);
+}
+
+.page-state-error {
+  border-left: 3px solid var(--prem-red);
+}
+
+.page-state-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--prem-radius-md);
+  background: var(--prem-light);
+  color: var(--prem-blue);
+}
+
+.page-state-error .page-state-icon {
+  background: var(--prem-red-soft);
+  color: var(--prem-red);
+}
+
+.page-state-spinner {
+  animation: page-state-spin 0.9s linear infinite;
+}
+
+.page-state-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.page-state-title {
+  color: var(--prem-text);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.page-state-description {
+  margin-top: 4px;
+  color: var(--prem-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.page-state > .btn {
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.session-loader {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--prem-bg);
+}
+
+@keyframes page-state-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .page-state {
+    flex-wrap: wrap;
+  }
+
+  .page-state > .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

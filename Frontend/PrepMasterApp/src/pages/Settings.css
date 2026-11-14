@@ -200,6 +200,50 @@
   font-variant-numeric: tabular-nums;
 }
 
+.goal-value-input {
+  width: 92px;
+  min-height: 36px;
+  padding: 6px 8px;
+  background: var(--prem-light);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-sm);
+  color: var(--prem-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-select,
+.settings-time-input {
+  min-height: 40px;
+  max-width: 260px;
+  padding: 7px 10px;
+  background: var(--prem-light);
+  border: 1px solid var(--prem-border);
+  border-radius: var(--prem-radius-sm);
+  color: var(--prem-text);
+  font-size: 0.82rem;
+}
+
+.settings-select {
+  width: min(260px, 100%);
+}
+
+.settings-select:focus,
+.settings-time-input:focus,
+.goal-value-input:focus {
+  outline: none;
+  border-color: var(--prem-blue);
+  box-shadow: 0 0 0 3px var(--prem-blue-soft);
+}
+
+.settings-select[aria-invalid="true"],
+.settings-time-input[aria-invalid="true"],
+.goal-value-input[aria-invalid="true"] {
+  border-color: var(--prem-red);
+}
+
 .settings-page .stepper-btn {
   display: grid;
   place-items: center;
@@ -240,6 +284,10 @@
   font-weight: 600;
 }
 
+.settings-page .save-feedback.is-error {
+  color: var(--prem-red);
+}
+
 @media (max-width: 640px) {
   .setting-group {
     padding: 18px;
@@ -251,6 +299,12 @@
 
   .switch {
     margin-left: auto;
+  }
+
+  .settings-select,
+  .settings-time-input {
+    max-width: none;
+    width: 100%;
   }
 
   .save-settings {

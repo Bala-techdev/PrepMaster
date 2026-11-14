@@ -60,7 +60,14 @@ public final class UserMapper {
 				settings.isEmailNotifications(),
 				settings.getDailyGoalMinutes(),
 				settings.getReminderTime(),
-				settings.getTimezone()
+				settings.getTimezone(),
+				settings.isNotificationInAppEnabled(),
+				settings.isNotificationTasks(),
+				settings.isNotificationAchievements(),
+				settings.isNotificationStreaks(),
+				settings.isNotificationCommunity(),
+				settings.isNotificationMockInterviews(),
+				settings.isNotificationReminders()
 		);
 	}
 

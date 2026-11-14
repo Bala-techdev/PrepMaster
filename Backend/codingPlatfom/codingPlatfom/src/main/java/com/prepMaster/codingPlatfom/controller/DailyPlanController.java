@@ -17,6 +17,7 @@ public class DailyPlanController {
 	public DailyPlanController(DailyPlanService plans, GamificationService gamification) { this.plans = plans; this.gamification = gamification; }
 	@PostMapping("/daily") @ResponseStatus(HttpStatus.CREATED)
 	public Plan generate(Authentication auth, @Valid @RequestBody DailyPlanRequest request) { return plans.generate(userId(auth), request); }
+	@GetMapping("/daily") public Plan today(Authentication auth) { return plans.today(userId(auth)); }
 	@GetMapping("/{id}") public Plan get(Authentication auth, @PathVariable Long id) { return plans.get(userId(auth), id); }
 	@PostMapping("/tasks/{taskId}/complete")
 	public Completion complete(Authentication auth, @PathVariable Long taskId) { return gamification.complete(userId(auth), taskId); }
