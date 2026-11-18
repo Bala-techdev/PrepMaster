@@ -427,6 +427,53 @@
   border-bottom: 1px solid var(--prem-border);
 }
 
+.notification-head-copy {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.notification-head-count {
+  padding: 2px 7px;
+  border-radius: var(--prem-radius-pill);
+  background: var(--prem-blue-soft);
+  color: var(--prem-blue-strong);
+  font-size: 0.64rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.notification-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.notification-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 7px;
+  border: 0;
+  border-radius: var(--prem-radius-xs);
+  background: transparent;
+  color: var(--prem-blue-strong);
+  font-size: 0.68rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.notification-action:hover:not(:disabled) {
+  background: var(--prem-light);
+}
+
+.notification-action:disabled {
+  color: var(--prem-text-muted);
+  opacity: 0.6;
+}
+
 .notification-title {
   color: var(--prem-text);
   font-size: 0.9rem;
@@ -458,6 +505,36 @@
   background: var(--prem-light);
 }
 
+.notification-item-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.notification-item.is-unread {
+  background: color-mix(in srgb, var(--prem-blue-soft) 42%, var(--prem-card));
+}
+
+.notification-item.is-unread:hover {
+  background: var(--prem-blue-soft);
+}
+
+.notification-item-dot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--prem-blue);
+}
+
+.notification-item-time {
+  margin-top: 2px;
+  color: var(--prem-text-muted);
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .notification-item-title {
   color: var(--prem-text);
   font-size: 0.8rem;
@@ -468,6 +545,50 @@
   color: var(--prem-text-muted);
   font-size: 0.74rem;
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notification-panel-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  border-top: 1px solid var(--prem-border);
+}
+
+.notification-panel-link {
+  color: var(--prem-blue-strong);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.notification-panel-link:hover {
+  text-decoration: underline;
+}
+
+.nav-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: auto;
+  padding: 0 6px;
+  border-radius: var(--prem-radius-pill);
+  background: var(--prem-blue);
+  color: #ffffff;
+  font-size: 0.63rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.nav-link.active .nav-badge {
+  background: var(--prem-card);
+  color: var(--prem-blue-strong);
 }
 
 .notification-empty {

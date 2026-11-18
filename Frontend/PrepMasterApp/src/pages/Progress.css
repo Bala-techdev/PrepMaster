@@ -119,6 +119,13 @@
   margin-top: 2px;
 }
 
+.history-view-all {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 13px;
+  font-size: 0.78rem;
+}
+
 .streak-cards {
   display: grid;
   gap: 12px;

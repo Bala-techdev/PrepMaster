@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Calendar,
@@ -14,8 +15,12 @@ import StatCard from '../components/StatCard'
 import ActivityHeatmap from '../components/ActivityHeatmap'
 import EmptyState from '../components/EmptyState'
 import { useAppData } from '../state/useAppData'
-import { useAppState } from '../state/appContext'
+import {
+  getInterviewHistory,
+  getInterviewPerformance,
+} from '../api/mockInterviewService'
 import { formatDate } from '../lib/date'
+import { difficultyLabel } from '../lib/format'
 import './Progress.css'
 
 const topicColors = [
@@ -29,8 +34,37 @@ const topicColors = [
 
 export default function ProgressPage() {
   const { stats, topicPerformance } = useAppData()
-  const { interviews } = useAppState()
   const overallPercentage = Math.round((Number(stats.completionRate) || 0) * 100)
+  const [interviewStats, setInterviewStats] = useState(null)
+  const [interviewHistory, setInterviewHistory] = useState([])
+  const [interviewLoading, setInterviewLoading] = useState(true)
+  const [interviewError, setInterviewError] = useState(null)
+
+  useEffect(() => {
+    let active = true
+    setInterviewLoading(true)
+    setInterviewError(null)
+
+    Promise.all([
+      getInterviewPerformance(),
+      getInterviewHistory({ page: 0, size: 5 }),
+    ])
+      .then(([performance, history]) => {
+        if (!active) return
+        setInterviewStats(performance)
+        setInterviewHistory(history?.content || [])
+      })
+      .catch((requestError) => {
+        if (active) setInterviewError(requestError)
+      })
+      .finally(() => {
+        if (active) setInterviewLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   return (
     <section className="progress-page">
@@ -47,9 +81,8 @@ export default function ProgressPage() {
 
         <p className="progress-note" role="note">
           <strong>Account-backed history:</strong> plan completion, XP, level,
-          streak and solved-question values are calculated by the backend from
-          completed daily-plan tasks. Mock interview history is still stored in
-          this browser because the backend has no interview endpoints.
+          streak, solved-question values and mock-interview results are
+          calculated by the backend from your stored activity.
         </p>
 
         <div className="progress-top">
@@ -261,19 +294,41 @@ export default function ProgressPage() {
           aria-labelledby="history-title"
         >
           <div className="section-head progress-section-head">
-            <h2 className="section-title" id="history-title">
-              Mock interview history
-            </h2>
-            <span className="section-count">
-              {interviews.length} session{interviews.length === 1 ? '' : 's'}
-            </span>
+            <div>
+              <h2 className="section-title" id="history-title">
+                Mock interview history
+              </h2>
+              {interviewStats && (
+                <p className="performance-note">
+                  {interviewStats.completedSessions} completed ·{' '}
+                  {interviewStats.expiredSessions} expired ·{' '}
+                  {Math.round(interviewStats.averageCompletionPercentage || 0)}%
+                  average completion
+                </p>
+              )}
+            </div>
+            <Link
+              to="/mock-interview/history"
+              className="btn btn-secondary history-view-all"
+            >
+              View all
+            </Link>
           </div>
 
-          {interviews.length === 0 ? (
+          {interviewLoading ? (
+            <p className="performance-note" role="status">
+              Loading interview activity…
+            </p>
+          ) : interviewError ? (
+            <p className="field-error" role="alert">
+              {interviewError.message}{' '}
+              <Link to="/mock-interview/history">Open interview history</Link>
+            </p>
+          ) : interviewHistory.length === 0 ? (
             <EmptyState
               icon={Trophy}
               title="No mock interviews yet"
-              description="Finish a prototype session and its interaction summary will appear here. This history stays in this browser only."
+              description="Start a timed session and its completion summary will appear here."
             >
               <Link to="/mock-interview" className="btn btn-primary">
                 Start a mock interview
@@ -281,43 +336,50 @@ export default function ProgressPage() {
             </EmptyState>
           ) : (
             <div className="interview-history-list">
-              {interviews.map((interview) => (
-                <div key={interview.id} className="interview-item completed">
-                  <span className="interview-date">
-                    {formatDate(interview.endedAt)}
-                  </span>
-                  <span
-                    className={`interview-difficulty ${interview.difficulty.toLowerCase()}`}
-                  >
-                    {interview.difficulty === 'All'
-                      ? 'Mixed'
-                      : interview.difficulty}
-                  </span>
-                  <span className="interview-topic">
-                    {interview.topic === 'All' ? 'Mixed topics' : interview.topic}
-                  </span>
-                  <span className="interview-duration">
-                    {interview.endReason === 'time'
+              {interviewHistory.map((interview) => {
+                const status =
+                  interview.status === 'COMPLETED'
+                    ? 'Completed'
+                    : interview.status === 'EXPIRED'
                       ? 'Timer expired'
-                      : 'Ended early'}
-                  </span>
-                  <span className="interview-duration">
-                    {interview.answeredCount}/{interview.questionIds.length}{' '}
-                    answered
-                  </span>
-                  <span className="interview-result">
-                    {interview.score}% completion
-                  </span>
-                </div>
-              ))}
+                      : interview.status === 'CANCELLED'
+                        ? 'Cancelled'
+                        : 'In progress'
+                const score =
+                  interview.score === null || interview.score === undefined
+                    ? '—'
+                    : `${Math.round(Number(interview.score))}%`
+
+                return (
+                  <div key={interview.id} className="interview-item">
+                    <span className="interview-date">
+                      {formatDate(interview.startedAt)}
+                    </span>
+                    <span
+                      className={`interview-difficulty ${String(interview.difficulty).toLowerCase()}`}
+                    >
+                      {difficultyLabel(interview.difficulty)}
+                    </span>
+                    <span className="interview-topic">
+                      {interview.categoryLabel}
+                    </span>
+                    <span className="interview-duration">{status}</span>
+                    <span className="interview-duration">
+                      {interview.questionsAnswered}/{interview.questionCount}{' '}
+                      answered
+                    </span>
+                    <span className="interview-result">{score}</span>
+                  </div>
+                )
+              })}
             </div>
           )}
 
           <p className="history-note">
             <ClipboardList size={13} aria-hidden="true" />
-            Scores measure how many questions you marked answered, not answer
-            correctness. Sessions are stored only in this browser and do not
-            affect backend XP.
+            Scores measure how many assigned questions you answered, not answer
+            correctness. Results are stored by the backend and count toward
+            achievement progress.
           </p>
         </section>
       </div>

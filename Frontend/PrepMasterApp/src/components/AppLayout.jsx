@@ -6,10 +6,13 @@ import {
   useNavigate,
 } from 'react-router-dom'
 import {
+  Award,
   Bell,
   BookOpen,
+  CheckCheck,
   FileSearch,
   Calendar,
+  History,
   Home,
   LogOut,
   Menu,
@@ -19,6 +22,7 @@ import {
   Target,
   Terminal,
   TrendingUp,
+  Trophy,
   User,
   Users,
   X,
@@ -27,6 +31,7 @@ import {
 import avatarSrc from '../assets/placeholder-avatar.svg'
 import { useAuth } from '../auth/useAuth'
 import { useAppData } from '../state/useAppData'
+import { formatRelativeTime } from '../lib/date'
 import PageState from './PageState'
 import './AppLayout.css'
 
@@ -35,9 +40,13 @@ const primaryLinks = [
   { to: '/daily-plan', label: 'Daily Plan', icon: Calendar },
   { to: '/practice', label: 'Practice', icon: Terminal },
   { to: '/mock-interview', label: 'Mock Interview', icon: Zap },
+  { to: '/mock-interview/history', label: 'Interview History', icon: History },
   { to: '/progress', label: 'Progress', icon: TrendingUp },
   { to: '/learn', label: 'Learn', icon: BookOpen },
   { to: '/community', label: 'Community', icon: Users },
+  { to: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+  { to: '/achievements', label: 'Achievements', icon: Award },
+  { to: '/notifications', label: 'Notifications', icon: Bell },
   { to: '/resume-scanner', label: 'Resume Scanner', icon: FileSearch },
 ]
 
@@ -49,7 +58,7 @@ const secondaryLinks = [
   { to: '/skill-gaps', label: 'Skill Gaps', icon: Target },
 ]
 
-function SidebarLink({ to, label, icon: Icon, end, onNavigate }) {
+function SidebarLink({ to, label, icon: Icon, end, onNavigate, badge = 0 }) {
   return (
     <NavLink
       to={to}
@@ -59,6 +68,11 @@ function SidebarLink({ to, label, icon: Icon, end, onNavigate }) {
     >
       <Icon className="nav-icon" aria-hidden="true" />
       <span>{label}</span>
+      {badge > 0 && (
+        <span className="nav-badge" aria-label={`${badge} unread`}>
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
     </NavLink>
   )
 }
@@ -70,7 +84,12 @@ export default function AppLayout() {
     profile,
     stats,
     notifications,
+    notificationUnreadCount,
+    notificationsLoading,
     notificationsEnabled,
+    loadNotifications,
+    markNotificationRead,
+    markAllNotificationsRead,
     loading,
     ready,
     error,
@@ -126,6 +145,10 @@ export default function AppLayout() {
   useEffect(() => {
     if (!isNotificationsOpen) return undefined
 
+    loadNotifications({ silent: true }).catch(() => {
+      /* The panel keeps the previous preview on failure. */
+    })
+
     const onPointerDown = (event) => {
       if (
         notificationRef.current &&
@@ -146,7 +169,7 @@ export default function AppLayout() {
       document.removeEventListener('mousedown', onPointerDown)
       document.removeEventListener('keydown', onKeyDown)
     }
-  }, [isNotificationsOpen])
+  }, [isNotificationsOpen, loadNotifications])
 
   const closeMenu = () => setIsMenuOpen(false)
 
@@ -162,6 +185,21 @@ export default function AppLayout() {
     closeMenu()
     logout()
     navigate('/login', { replace: true })
+  }
+
+  const handleNotificationOpen = (item) => {
+    setIsNotificationsOpen(false)
+    if (!item.read) {
+      markNotificationRead(item.id).catch(() => {
+        /* Opening the link is more important than the read receipt. */
+      })
+    }
+  }
+
+  const handleMarkAllRead = () => {
+    markAllNotificationsRead().catch(() => {
+      /* The next preview refresh reconciles the count. */
+    })
   }
 
   const retry = () => {
@@ -205,6 +243,9 @@ export default function AppLayout() {
                 key={link.to}
                 {...link}
                 end={link.to === '/dashboard'}
+                badge={
+                  link.to === '/notifications' ? notificationUnreadCount : 0
+                }
                 onNavigate={closeMenu}
               />
             ))}
@@ -284,7 +325,7 @@ export default function AppLayout() {
                   onClick={() => setIsNotificationsOpen((open) => !open)}
                 >
                   <Bell size={19} aria-hidden="true" />
-                  {notificationsEnabled && notifications.length > 0 && (
+                  {notificationUnreadCount > 0 && (
                     <span className="notification-dot" aria-hidden="true" />
                   )}
                 </button>
@@ -297,36 +338,73 @@ export default function AppLayout() {
                     aria-label="Notifications"
                   >
                     <div className="notification-head">
-                      <h2 className="notification-title">Notifications</h2>
-                      <button
-                        type="button"
-                        className="icon-button notification-close"
-                        onClick={() => setIsNotificationsOpen(false)}
-                        aria-label="Close notifications"
-                      >
-                        <X size={16} aria-hidden="true" />
-                      </button>
+                      <div className="notification-head-copy">
+                        <h2 className="notification-title">Notifications</h2>
+                        {notificationUnreadCount > 0 && (
+                          <span className="notification-head-count">
+                            {notificationUnreadCount} unread
+                          </span>
+                        )}
+                      </div>
+                      <div className="notification-head-actions">
+                        <button
+                          type="button"
+                          className="notification-action"
+                          onClick={handleMarkAllRead}
+                          disabled={notificationUnreadCount === 0}
+                        >
+                          <CheckCheck size={13} aria-hidden="true" />
+                          Mark all read
+                        </button>
+                        <button
+                          type="button"
+                          className="icon-button notification-close"
+                          onClick={() => setIsNotificationsOpen(false)}
+                          aria-label="Close notifications"
+                        >
+                          <X size={16} aria-hidden="true" />
+                        </button>
+                      </div>
                     </div>
 
                     {notificationsEnabled ? (
-                      <ul className="notification-list">
-                        {notifications.map((item) => (
-                          <li key={item.id}>
-                            <Link
-                              to={item.to}
-                              className="notification-item"
-                              onClick={() => setIsNotificationsOpen(false)}
-                            >
-                              <span className="notification-item-title">
-                                {item.title}
-                              </span>
-                              <span className="notification-item-message">
-                                {item.message}
-                              </span>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
+                      notifications.length === 0 ? (
+                        <p className="notification-empty">
+                          {notificationsLoading
+                            ? 'Loading notifications…'
+                            : 'You are all caught up. New reminders and updates will appear here.'}
+                        </p>
+                      ) : (
+                        <ul className="notification-list">
+                          {notifications.map((item) => (
+                            <li key={item.id}>
+                              <Link
+                                to={item.link || '/notifications'}
+                                className={`notification-item${item.read ? '' : ' is-unread'}`}
+                                onClick={() => handleNotificationOpen(item)}
+                              >
+                                <span className="notification-item-title-row">
+                                  <span className="notification-item-title">
+                                    {item.title}
+                                  </span>
+                                  {!item.read && (
+                                    <span
+                                      className="notification-item-dot"
+                                      aria-hidden="true"
+                                    />
+                                  )}
+                                </span>
+                                <span className="notification-item-message">
+                                  {item.message}
+                                </span>
+                                <span className="notification-item-time">
+                                  {formatRelativeTime(item.createdAt)}
+                                </span>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      )
                     ) : (
                       <p className="notification-empty">
                         Notifications are turned off. Enable them in Settings to
@@ -334,13 +412,22 @@ export default function AppLayout() {
                       </p>
                     )}
 
-                    <Link
-                      to="/settings"
-                      className="notification-settings-link"
-                      onClick={() => setIsNotificationsOpen(false)}
-                    >
-                      Notification settings
-                    </Link>
+                    <div className="notification-panel-links">
+                      <Link
+                        to="/notifications"
+                        className="notification-panel-link"
+                        onClick={() => setIsNotificationsOpen(false)}
+                      >
+                        View all notifications
+                      </Link>
+                      <Link
+                        to="/settings"
+                        className="notification-panel-link"
+                        onClick={() => setIsNotificationsOpen(false)}
+                      >
+                        Notification settings
+                      </Link>
+                    </div>
                   </div>
                 )}
               </div>

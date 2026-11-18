@@ -151,6 +151,24 @@
   opacity: 0.45;
 }
 
+.notification-preference-list {
+  padding-left: 14px;
+  border-left: 2px solid var(--prem-border);
+}
+
+.notification-preference-list .setting-row {
+  padding: 12px 0;
+}
+
+.notification-preference-list .setting-row:first-of-type {
+  padding-top: 12px;
+}
+
+.notification-preference-list .setting-row:last-of-type {
+  padding-bottom: 12px;
+  border-bottom: 0;
+}
+
 /* ---------- Preferences ---------- */
 
 .preference-tags {

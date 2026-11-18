@@ -14,9 +14,9 @@ import LevelCard from '../components/LevelCard'
 import ActivityHeatmap from '../components/ActivityHeatmap'
 import StreakCard from '../components/StreakCard'
 import { useAppData } from '../state/useAppData'
-import { useAppState } from '../state/appContext'
 import { msUntilMidnight, pad } from '../lib/date'
 import { getArenaOverview } from '../api/arenaService'
+import { getInterviewPerformance } from '../api/mockInterviewService'
 import './Dashboard.css'
 
 const padValue = (value) => pad(value)
@@ -31,10 +31,10 @@ function formatToday() {
 
 export default function Dashboard() {
   const { profile, tasks, stats, settings } = useAppData()
-  const { interviews } = useAppState()
   const [remainingMs, setRemainingMs] = useState(msUntilMidnight)
   const [today, setToday] = useState(formatToday)
   const [arena, setArena] = useState(null)
+  const [interviewStats, setInterviewStats] = useState(null)
 
   useEffect(() => {
     const tick = () => {
@@ -54,7 +54,12 @@ export default function Dashboard() {
     getArenaOverview()
       .then((data) => active && setArena(data))
       .catch(() => {})
-    return () => { active = false }
+    getInterviewPerformance()
+      .then((data) => active && setInterviewStats(data))
+      .catch(() => {})
+    return () => {
+      active = false
+    }
   }, [])
 
   const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000))
@@ -72,8 +77,8 @@ export default function Dashboard() {
     {
       to: '/mock-interview',
       label: 'Mock interviews',
-      value: interviews.length
-        ? `${interviews.length} recorded locally`
+      value: interviewStats
+        ? `${interviewStats.completedSessions} completed · ${interviewStats.inProgressSessions} active`
         : 'Start your first',
       icon: Trophy,
       tone: 'indigo',

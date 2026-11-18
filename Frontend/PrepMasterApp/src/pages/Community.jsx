@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowUp,
@@ -6,103 +6,260 @@ import {
   Filter,
   MessageSquare,
   Search,
+  Sparkles,
   Users,
   X,
 } from 'lucide-react'
 import EmptyState from '../components/EmptyState'
-import { DISCUSSION_TOPICS } from '../data/discussions'
+import PageState from '../components/PageState'
+import Pagination from '../components/Pagination'
+import {
+  createCommunityPost,
+  getCommunityActivity,
+  getCommunityPosts,
+  getCommunityTopics,
+  toggleCommunityLike,
+} from '../api/communityService'
 import { formatRelativeTime } from '../lib/date'
-import { useAppState } from '../state/appContext'
 import './Community.css'
 
+const PAGE_SIZE = 9
 const TITLE_MIN = 5
-const TITLE_MAX = 120
+const TITLE_MAX = 160
 const BODY_MIN = 10
-const BODY_MAX = 600
+const BODY_MAX = 4000
+
+const emptyForm = { title: '', body: '', topic: 'DSA' }
+
+function authorName(author) {
+  return author?.displayName || author?.username || 'PrepMaster learner'
+}
+
+function validatePost(form) {
+  const errors = {}
+  const title = form.title.trim()
+  const body = form.body.trim()
+
+  if (title.length < TITLE_MIN) {
+    errors.title = `Give the discussion a title of at least ${TITLE_MIN} characters.`
+  } else if (title.length > TITLE_MAX) {
+    errors.title = `Keep the title under ${TITLE_MAX} characters.`
+  }
+
+  if (body.length < BODY_MIN) {
+    errors.body = `Add a little more detail (at least ${BODY_MIN} characters).`
+  } else if (body.length > BODY_MAX) {
+    errors.body = `Keep the post under ${BODY_MAX} characters.`
+  }
+
+  if (!form.topic) {
+    errors.topic = 'Choose a topic.'
+  }
+
+  return errors
+}
 
 export default function CommunityPage() {
-  const { community, addDiscussion, toggleVote } = useAppState()
-  const [searchQuery, setSearchQuery] = useState('')
+  const [topics, setTopics] = useState([])
+  const [topicsError, setTopicsError] = useState('')
+  const [posts, setPosts] = useState([])
+  const [pageInfo, setPageInfo] = useState({
+    page: 0,
+    totalPages: 0,
+    totalElements: 0,
+  })
+  const [page, setPage] = useState(0)
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [topic, setTopic] = useState('All')
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
-  const [category, setCategory] = useState('General')
-  const [errors, setErrors] = useState({})
-  const [feedback, setFeedback] = useState('')
+  const [sort, setSort] = useState('recent')
+  const [reloadToken, setReloadToken] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [actionError, setActionError] = useState('')
+  const [activity, setActivity] = useState([])
+  const [activityError, setActivityError] = useState('')
+  const [form, setForm] = useState(emptyForm)
+  const [formErrors, setFormErrors] = useState({})
+  const [creating, setCreating] = useState(false)
+  const [notice, setNotice] = useState('')
+  const [likingId, setLikingId] = useState(null)
 
-  const filteredDiscussions = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
+  useEffect(() => {
+    let active = true
 
-    return community.discussions.filter((discussion) => {
-      const matchesTopic = topic === 'All' || discussion.category === topic
-      const matchesSearch =
-        query.length === 0 ||
-        discussion.title.toLowerCase().includes(query) ||
-        discussion.body.toLowerCase().includes(query) ||
-        discussion.category.toLowerCase().includes(query)
+    getCommunityTopics()
+      .then((data) => {
+        if (!active) return
+        const list = data || []
+        setTopics(list)
+        setTopicsError('')
+        setForm((current) =>
+          current.topic || list.length === 0
+            ? current
+            : { ...current, topic: list[0] },
+        )
+      })
+      .catch((requestError) => {
+        if (active) {
+          setTopicsError(
+            requestError.message || 'Community topics could not be loaded.',
+          )
+        }
+      })
 
-      return matchesTopic && matchesSearch
+    getCommunityActivity(8)
+      .then((data) => active && setActivity(data || []))
+      .catch((requestError) => {
+        if (active) {
+          setActivityError(
+            requestError.message || 'Recent activity could not be loaded.',
+          )
+        }
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(search.trim())
+      setPage(0)
+    }, 300)
+
+    return () => window.clearTimeout(timer)
+  }, [search])
+
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    setError(null)
+
+    getCommunityPosts({
+      page,
+      size: PAGE_SIZE,
+      search: debouncedSearch || undefined,
+      topic: topic === 'All' ? undefined : topic,
+      sort,
     })
-  }, [community.discussions, searchQuery, topic])
+      .then((data) => {
+        if (!active) return
+        setPosts(data?.content || [])
+        setPageInfo({
+          page: Number(data?.page) || 0,
+          totalPages: Number(data?.totalPages) || 0,
+          totalElements: Number(data?.totalElements) || 0,
+        })
+      })
+      .catch((requestError) => {
+        if (active) {
+          setError(requestError)
+          setPosts([])
+          setPageInfo({ page: 0, totalPages: 0, totalElements: 0 })
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
 
-  const hasFilters = searchQuery.trim() !== '' || topic !== 'All'
+    return () => {
+      active = false
+    }
+  }, [debouncedSearch, page, reloadToken, sort, topic])
 
   const clearFilters = () => {
-    setSearchQuery('')
+    setSearch('')
     setTopic('All')
+    setSort('recent')
+    setPage(0)
   }
 
-  const validate = () => {
-    const nextErrors = {}
-    const cleanTitle = title.trim()
-    const cleanBody = body.trim()
+  const hasFilters =
+    search.trim() !== '' || topic !== 'All' || sort !== 'recent'
 
-    if (cleanTitle.length < TITLE_MIN) {
-      nextErrors.title = `Give the discussion a title of at least ${TITLE_MIN} characters.`
-    } else if (cleanTitle.length > TITLE_MAX) {
-      nextErrors.title = `Keep the title under ${TITLE_MAX} characters.`
-    }
-
-    if (cleanBody.length < BODY_MIN) {
-      nextErrors.body = `Add a little more detail (at least ${BODY_MIN} characters).`
-    } else if (cleanBody.length > BODY_MAX) {
-      nextErrors.body = `Keep the post under ${BODY_MAX} characters.`
-    }
-
-    return nextErrors
+  const updateForm = (patch) => {
+    setForm((current) => ({ ...current, ...patch }))
+    setNotice('')
+    setActionError('')
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    setFeedback('')
-    const nextErrors = validate()
+    if (creating) return
 
+    const nextErrors = validatePost(form)
     if (Object.keys(nextErrors).length) {
-      setErrors(nextErrors)
+      setFormErrors(nextErrors)
+      setActionError('')
       return
     }
 
-    const result = addDiscussion({
-      title: title.trim(),
-      body: body.trim(),
-      category,
-    })
+    setCreating(true)
+    setFormErrors({})
+    setActionError('')
+    setNotice('')
 
-    if (!result.ok) {
-      setErrors({
-        form: 'The discussion could not be saved. Check the fields and try again.',
+    try {
+      await createCommunityPost({
+        title: form.title.trim(),
+        body: form.body.trim(),
+        topic: form.topic,
       })
-      return
+      setForm((current) => ({ ...current, title: '', body: '' }))
+      setTopic('All')
+      setSort('recent')
+      setPage(0)
+      setReloadToken((current) => current + 1)
+      setNotice('Discussion posted. It is now visible to signed-in learners.')
+      getCommunityActivity(8)
+        .then((data) => setActivity(data || []))
+        .catch(() => {})
+    } catch (requestError) {
+      if (
+        requestError.fieldErrors &&
+        Object.keys(requestError.fieldErrors).length
+      ) {
+        setFormErrors(requestError.fieldErrors)
+      }
+      setActionError(
+        requestError.message ||
+          'The discussion could not be posted. Check the fields and try again.',
+      )
+    } finally {
+      setCreating(false)
     }
-
-    setErrors({})
-    setTitle('')
-    setBody('')
-    setCategory('General')
-    setFeedback(
-      'Discussion posted in this browser. It is local demo data and is not visible to other users.',
-    )
   }
+
+  const handleLike = async (post) => {
+    if (likingId) return
+    setLikingId(post.id)
+    setActionError('')
+
+    try {
+      const state = await toggleCommunityLike(post.id)
+      setPosts((current) =>
+        current.map((item) =>
+          item.id === post.id
+            ? {
+                ...item,
+                likeCount: Number(state.likeCount) || 0,
+                likedByMe: Boolean(state.liked),
+              }
+            : item,
+        ),
+      )
+    } catch (requestError) {
+      setActionError(
+        requestError.message || 'The like could not be updated. Try again.',
+      )
+    } finally {
+      setLikingId(null)
+    }
+  }
+
+  const totalPages = pageInfo.totalPages
 
   return (
     <section className="community-page">
@@ -112,20 +269,27 @@ export default function CommunityPage() {
             <p className="page-eyebrow">Community</p>
             <h1 className="page-title">Community</h1>
             <p className="page-subtitle">
-              Share study notes and questions in this local prototype.
+              Share study notes, ask questions and react to other learners.
+              Posts are stored in PrepMaster and visible to signed-in users.
             </p>
           </div>
           <span className="community-count">
-            {filteredDiscussions.length} discussion
-            {filteredDiscussions.length === 1 ? '' : 's'}
+            {pageInfo.totalElements} discussion
+            {pageInfo.totalElements === 1 ? '' : 's'}
           </span>
         </header>
 
         <p className="community-note" role="note">
-          <strong>Local demo:</strong> seeded discussions and anything you post
-          stay in this browser. They are not uploaded and are not visible to
-          other users.
+          <strong>Community guidelines:</strong> be specific and helpful. Do not
+          post passwords, private contact details or anything you would not
+          share publicly. Posts are plain text and sanitized by the backend.
         </p>
+
+        {actionError && (
+          <p className="community-alert" role="alert">
+            {actionError}
+          </p>
+        )}
 
         <form className="discussion-composer" onSubmit={handleSubmit} noValidate>
           <h2 className="composer-label" id="composer-title">
@@ -139,37 +303,64 @@ export default function CommunityPage() {
               id="discussion-title"
               className="input"
               placeholder="What do you want to discuss?"
-              value={title}
+              value={form.title}
               maxLength={TITLE_MAX}
               onChange={(event) => {
-                setTitle(event.target.value)
-                setFeedback('')
-                if (errors.title) setErrors((current) => ({ ...current, title: undefined }))
+                updateForm({ title: event.target.value })
+                setFormErrors((current) => ({ ...current, title: undefined }))
               }}
-              aria-invalid={Boolean(errors.title)}
-              aria-describedby={errors.title ? 'discussion-title-error' : undefined}
+              aria-invalid={Boolean(formErrors.title)}
+              aria-describedby={
+                formErrors.title ? 'discussion-title-error' : undefined
+              }
             />
-            {errors.title && (
-              <p className="field-error" id="discussion-title-error" role="alert">
-                {errors.title}
+            {formErrors.title && (
+              <p
+                className="field-error"
+                id="discussion-title-error"
+                role="alert"
+              >
+                {formErrors.title}
               </p>
             )}
           </div>
 
-          <div className="composer-field">
-            <label htmlFor="discussion-category">Topic</label>
-            <select
-              id="discussion-category"
-              className="select"
-              value={category}
-              onChange={(event) => setCategory(event.target.value)}
-            >
-              {DISCUSSION_TOPICS.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
+          <div className="discussion-composer-row">
+            <div className="composer-field">
+              <label htmlFor="discussion-category">Topic</label>
+              <select
+                id="discussion-category"
+                className="select"
+                value={form.topic}
+                onChange={(event) => {
+                  updateForm({ topic: event.target.value })
+                  setFormErrors((current) => ({
+                    ...current,
+                    topic: undefined,
+                  }))
+                }}
+                aria-invalid={Boolean(formErrors.topic)}
+              >
+                {topics.length === 0 && (
+                  <option value={form.topic}>{form.topic || 'Loading…'}</option>
+                )}
+                {topics.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+              {formErrors.topic && (
+                <p className="field-error" role="alert">
+                  {formErrors.topic}
+                </p>
+              )}
+              {topicsError && (
+                <p className="field-error" role="alert">
+                  {topicsError}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="composer-field">
@@ -178,42 +369,43 @@ export default function CommunityPage() {
               id="discussion-input"
               className="textarea"
               placeholder="Ask a question or share a study tip..."
-              value={body}
+              value={form.body}
               onChange={(event) => {
-                setBody(event.target.value)
-                setFeedback('')
-                if (errors.body) setErrors((current) => ({ ...current, body: undefined }))
+                updateForm({ body: event.target.value })
+                setFormErrors((current) => ({ ...current, body: undefined }))
               }}
               maxLength={BODY_MAX}
               rows={4}
-              aria-invalid={Boolean(errors.body)}
-              aria-describedby={errors.body ? 'discussion-body-error' : undefined}
+              aria-invalid={Boolean(formErrors.body)}
+              aria-describedby={
+                formErrors.body ? 'discussion-body-error' : undefined
+              }
             />
-            {errors.body && (
+            {formErrors.body && (
               <p className="field-error" id="discussion-body-error" role="alert">
-                {errors.body}
+                {formErrors.body}
               </p>
             )}
           </div>
 
           <div className="composer-footer">
             <span className="composer-count">
-              {body.length}/{BODY_MAX} characters
+              {form.body.length}/{BODY_MAX} characters
             </span>
-            <button type="submit" className="btn btn-primary">
-              Post discussion
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={creating || topics.length === 0}
+            >
+              <MessageSquare size={15} aria-hidden="true" />
+              {creating ? 'Posting…' : 'Post discussion'}
             </button>
           </div>
 
-          {errors.form && (
-            <p className="field-error" role="alert">
-              {errors.form}
-            </p>
-          )}
-          {feedback && (
+          {notice && (
             <p className="composer-feedback" role="status">
               <CheckCircle size={15} aria-hidden="true" />
-              {feedback}
+              {notice}
             </p>
           )}
         </form>
@@ -224,8 +416,8 @@ export default function CommunityPage() {
             <input
               type="search"
               placeholder="Search discussions..."
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
               aria-label="Search discussions"
             />
           </div>
@@ -235,21 +427,31 @@ export default function CommunityPage() {
               <Filter size={14} aria-hidden="true" />
               Topic
             </span>
-            <div className="chip-row" role="group" aria-label="Filter discussions by topic">
+            <div
+              className="chip-row"
+              role="group"
+              aria-label="Filter discussions by topic"
+            >
               <button
                 type="button"
                 className={`filter-chip${topic === 'All' ? ' active' : ''}`}
-                onClick={() => setTopic('All')}
+                onClick={() => {
+                  setTopic('All')
+                  setPage(0)
+                }}
                 aria-pressed={topic === 'All'}
               >
                 All
               </button>
-              {DISCUSSION_TOPICS.map((item) => (
+              {topics.map((item) => (
                 <button
                   key={item}
                   type="button"
                   className={`filter-chip${topic === item ? ' active' : ''}`}
-                  onClick={() => setTopic(item)}
+                  onClick={() => {
+                    setTopic(item)
+                    setPage(0)
+                  }}
                   aria-pressed={topic === item}
                 >
                   {item}
@@ -257,81 +459,209 @@ export default function CommunityPage() {
               ))}
             </div>
             {hasFilters && (
-              <button type="button" className="clear-filters" onClick={clearFilters}>
+              <button
+                type="button"
+                className="clear-filters"
+                onClick={clearFilters}
+              >
                 <X size={14} aria-hidden="true" />
                 Clear filters
               </button>
             )}
           </div>
+
+          <div className="community-sort" role="group" aria-label="Sort posts">
+            <span className="filter-label">Sort</span>
+            <button
+              type="button"
+              className={`filter-chip${sort === 'recent' ? ' active' : ''}`}
+              onClick={() => {
+                setSort('recent')
+                setPage(0)
+              }}
+              aria-pressed={sort === 'recent'}
+            >
+              Recent
+            </button>
+            <button
+              type="button"
+              className={`filter-chip${sort === 'popular' ? ' active' : ''}`}
+              onClick={() => {
+                setSort('popular')
+                setPage(0)
+              }}
+              aria-pressed={sort === 'popular'}
+            >
+              Most liked
+            </button>
+          </div>
         </div>
 
-        {filteredDiscussions.length === 0 ? (
-          <EmptyState
-            icon={MessageSquare}
-            title="No discussions found"
-            description="Try a different search term or topic, or start a new local discussion above."
-          >
-            <button type="button" className="btn btn-secondary" onClick={clearFilters}>
-              Clear filters
-            </button>
-          </EmptyState>
-        ) : (
-          <div className="discussions">
-            {filteredDiscussions.map((discussion) => {
-              const hasVoted = community.votedIds.includes(discussion.id)
+        <div className="community-layout">
+          <div className="community-main">
+            {loading ? (
+              <PageState
+                variant="loading"
+                title="Loading discussions"
+                description="Fetching posts, likes and comment counts."
+              />
+            ) : error ? (
+              <PageState
+                variant="error"
+                title="Discussions could not be loaded"
+                description={error.message}
+                onRetry={() => setReloadToken((current) => current + 1)}
+              />
+            ) : posts.length === 0 ? (
+              <EmptyState
+                icon={MessageSquare}
+                title="No discussions found"
+                description="Try a different search term or topic, or start a new discussion above."
+              >
+                {hasFilters && (
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={clearFilters}
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </EmptyState>
+            ) : (
+              <>
+                <div className="discussions">
+                  {posts.map((post) => (
+                    <article key={post.id} className="discussion-card">
+                      <div className="discussion-header">
+                        <span className="discussion-category">
+                          {post.topic}
+                        </span>
+                        <span className="discussion-time">
+                          {formatRelativeTime(post.createdAt)}
+                        </span>
+                      </div>
 
-              return (
-                <article key={discussion.id} className="discussion-card">
-                  <div className="discussion-header">
-                    <span className="discussion-category">
-                      {discussion.category}
-                    </span>
-                    <span className="discussion-time">
-                      {formatRelativeTime(discussion.createdAt)}
-                    </span>
-                  </div>
+                      <h2 className="discussion-title">
+                        <Link
+                          to={`/community/${post.id}`}
+                          className="discussion-title-link"
+                        >
+                          {post.title}
+                        </Link>
+                      </h2>
 
-                  <h2 className="discussion-title">
-                    <Link
-                      to={`/community/${discussion.id}`}
-                      className="discussion-title-link"
-                    >
-                      {discussion.title}
-                    </Link>
-                  </h2>
+                      <p className="discussion-excerpt">{post.excerpt}</p>
 
-                  <p className="discussion-excerpt">{discussion.body}</p>
+                      <div className="discussion-footer">
+                        <div className="discussion-meta">
+                          <span className="discussion-meta-item">
+                            <Users size={13} aria-hidden="true" />
+                            {authorName(post.author)}
+                            {post.ownedByMe ? ' · you' : ''}
+                          </span>
+                          <span className="discussion-meta-item">
+                            <MessageSquare size={13} aria-hidden="true" />
+                            {post.commentCount}{' '}
+                            {post.commentCount === 1 ? 'comment' : 'comments'}
+                          </span>
+                        </div>
 
-                  <div className="discussion-footer">
-                    <div className="discussion-meta">
-                      <span className="discussion-meta-item">
-                        <Users size={13} aria-hidden="true" />
-                        {discussion.author}
-                        {discussion.isDemo ? ' · demo' : ''}
-                      </span>
-                      <span className="discussion-meta-item">
-                        <MessageSquare size={13} aria-hidden="true" />
-                        {discussion.replies.length} repl
-                        {discussion.replies.length === 1 ? 'y' : 'ies'}
-                      </span>
-                    </div>
+                        <button
+                          type="button"
+                          className={`discussion-upvote${post.likedByMe ? ' active' : ''}`}
+                          onClick={() => handleLike(post)}
+                          disabled={likingId === post.id}
+                          aria-pressed={Boolean(post.likedByMe)}
+                          aria-label={`${post.likedByMe ? 'Remove like from' : 'Like'} ${post.title}`}
+                        >
+                          <ArrowUp size={13} aria-hidden="true" />
+                          {post.likeCount}
+                        </button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
 
-                    <button
-                      type="button"
-                      className={`discussion-upvote${hasVoted ? ' active' : ''}`}
-                      onClick={() => toggleVote(discussion.id)}
-                      aria-pressed={hasVoted}
-                      aria-label={`${hasVoted ? 'Remove upvote from' : 'Upvote'} ${discussion.title}`}
-                    >
-                      <ArrowUp size={13} aria-hidden="true" />
-                      {discussion.upvotes}
-                    </button>
-                  </div>
-                </article>
-              )
-            })}
+                <Pagination
+                  page={pageInfo.page}
+                  totalPages={totalPages}
+                  onChange={setPage}
+                  disabled={loading}
+                  label="Community discussions pagination"
+                />
+              </>
+            )}
           </div>
-        )}
+
+          <aside className="community-side" aria-labelledby="activity-title">
+            <section className="community-activity-card">
+              <div className="mock-section-head">
+                <div>
+                  <h2 className="composer-label" id="activity-title">
+                    Recent activity
+                  </h2>
+                  <p className="setup-help">
+                    Latest posts and comments across the community.
+                  </p>
+                </div>
+                <Sparkles
+                  className="mock-section-icon"
+                  size={17}
+                  aria-hidden="true"
+                />
+              </div>
+
+              {activityError ? (
+                <p className="field-error" role="alert">
+                  {activityError}
+                </p>
+              ) : activity.length === 0 ? (
+                <p className="community-activity-empty">
+                  No activity yet. Start the first discussion.
+                </p>
+              ) : (
+                <ul className="community-activity-list">
+                  {activity.map((item, index) => (
+                    <li
+                      key={`${item.type}-${item.postId}-${index}`}
+                      className="community-activity-item"
+                    >
+                      <span className="community-activity-dot" aria-hidden="true" />
+                      <div>
+                        <p className="community-activity-title">
+                          <Link to={`/community/${item.postId}`}>
+                            {item.title}
+                          </Link>
+                        </p>
+                        <p className="community-activity-meta">
+                          {item.type === 'COMMENT' ? 'Comment' : 'Post'} by{' '}
+                          {item.actorName || 'a learner'} ·{' '}
+                          {formatRelativeTime(item.at)}
+                        </p>
+                        {item.detail && (
+                          <p className="community-activity-detail">
+                            {item.detail}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            <section className="community-activity-card">
+              <h2 className="composer-label">Community rules</h2>
+              <ul className="community-rule-list">
+                <li>Keep posts and comments respectful.</li>
+                <li>Do not share personal or private information.</li>
+                <li>Posting and commenting are rate limited to prevent spam.</li>
+                <li>You can edit or delete only your own posts and comments.</li>
+              </ul>
+            </section>
+          </aside>
+        </div>
       </div>
     </section>
   )

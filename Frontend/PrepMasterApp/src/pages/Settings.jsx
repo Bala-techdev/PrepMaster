@@ -55,6 +55,55 @@ function buildTimeZones(current) {
   return [...new Set([current, ...fallbackTimeZones, ...supported].filter(Boolean))]
 }
 
+const NOTIFICATION_PREFERENCE_DEFAULTS = {
+  notificationInAppEnabled: true,
+  notificationTasks: true,
+  notificationAchievements: true,
+  notificationStreaks: true,
+  notificationCommunity: true,
+  notificationMockInterviews: true,
+  notificationReminders: true,
+}
+
+const notificationPreferenceRows = [
+  {
+    key: 'notificationInAppEnabled',
+    name: 'In-app notifications',
+    description:
+      'Master switch for the notification panel, unread badge and notifications page.',
+  },
+  {
+    key: 'notificationTasks',
+    name: 'Daily-plan tasks',
+    description: 'Completion and reminder updates for your generated plan.',
+  },
+  {
+    key: 'notificationAchievements',
+    name: 'Achievements',
+    description: 'Awarded when the backend unlocks a new achievement.',
+  },
+  {
+    key: 'notificationStreaks',
+    name: 'Streaks',
+    description: 'Streak milestones and streak-at-risk reminders.',
+  },
+  {
+    key: 'notificationCommunity',
+    name: 'Community',
+    description: 'Comments and interactions on your community posts.',
+  },
+  {
+    key: 'notificationMockInterviews',
+    name: 'Mock interviews',
+    description: 'Interview results and session reminders.',
+  },
+  {
+    key: 'notificationReminders',
+    name: 'Practice reminders',
+    description: 'In-app reminders based on your saved reminder time.',
+  },
+]
+
 function toDraft(settings) {
   return {
     theme: settings?.theme || 'SYSTEM',
@@ -62,6 +111,12 @@ function toDraft(settings) {
     dailyGoalMinutes: settings?.dailyGoalMinutes ?? 60,
     reminderTime: formatReminderTime(settings?.reminderTime),
     timezone: settings?.timezone || detectedTimeZone(),
+    ...Object.fromEntries(
+      Object.entries(NOTIFICATION_PREFERENCE_DEFAULTS).map(([key, fallback]) => [
+        key,
+        settings?.[key] ?? fallback,
+      ]),
+    ),
   }
 }
 
@@ -157,6 +212,12 @@ export default function SettingsPage() {
         dailyGoalMinutes: Number(nextDraft.dailyGoalMinutes),
         reminderTime: nextDraft.reminderTime || null,
         timezone: nextDraft.timezone.trim(),
+        ...Object.fromEntries(
+          Object.keys(NOTIFICATION_PREFERENCE_DEFAULTS).map((key) => [
+            key,
+            Boolean(nextDraft[key]),
+          ]),
+        ),
       })
       const savedAreas = saveFocusAreas(nextFocusAreas)
 
@@ -190,6 +251,7 @@ export default function SettingsPage() {
       dailyGoalMinutes: 60,
       reminderTime: '',
       timezone: detectedTimeZone(),
+      ...NOTIFICATION_PREFERENCE_DEFAULTS,
     }
 
     setDraft(defaults)
@@ -279,9 +341,86 @@ export default function SettingsPage() {
 
             <div className="setting-row">
               <div className="setting-copy">
-                <span className="setting-name">Enable notifications</span>
+                <span className="setting-name">In-app notifications</span>
                 <span className="setting-desc">
-                  Show the in-app notification panel and unread indicator.
+                  Show the notification panel, unread badge and notifications
+                  page. Turning this off stops new in-app notifications.
+                </span>
+              </div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  className="switch-input"
+                  checked={draft.notificationInAppEnabled}
+                  onChange={() =>
+                    updateDraft({
+                      notificationInAppEnabled:
+                        !draft.notificationInAppEnabled,
+                    })
+                  }
+                />
+                <span className="switch-track" aria-hidden="true" />
+                <span className="visually-hidden">In-app notifications</span>
+              </label>
+            </div>
+
+            <div
+              className="notification-preference-list"
+              aria-label="Notification categories"
+            >
+              {notificationPreferenceRows.slice(1).map((row) => {
+                const checked = Boolean(draft[row.key])
+                const disabled = !draft.notificationInAppEnabled
+
+                return (
+                  <div className="setting-row" key={row.key}>
+                    <div className="setting-copy">
+                      <span className="setting-name">{row.name}</span>
+                      <span className="setting-desc">{row.description}</span>
+                    </div>
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        className="switch-input"
+                        checked={checked}
+                        disabled={disabled}
+                        onChange={() =>
+                          updateDraft({ [row.key]: !checked })
+                        }
+                      />
+                      <span className="switch-track" aria-hidden="true" />
+                      <span className="visually-hidden">{row.name}</span>
+                    </label>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-copy">
+                <span className="setting-name">Daily reminder time</span>
+                <span className="setting-desc">
+                  Used by the backend to generate an in-app practice reminder
+                  once per day.
+                </span>
+              </div>
+              <input
+                type="time"
+                className="settings-time-input"
+                value={draft.reminderTime}
+                onChange={(event) =>
+                  updateDraft({ reminderTime: event.target.value })
+                }
+                aria-label="Daily reminder time"
+              />
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-copy">
+                <span className="setting-name">Email notifications</span>
+                <span className="setting-desc">
+                  Stored preference only. PrepMaster does not send email, SMS or
+                  push notifications.
                 </span>
               </div>
               <label className="switch">
@@ -296,33 +435,16 @@ export default function SettingsPage() {
                   }
                 />
                 <span className="switch-track" aria-hidden="true" />
-                <span className="visually-hidden">Enable notifications</span>
+                <span className="visually-hidden">Email notifications</span>
               </label>
-            </div>
-
-            <div className="setting-row">
-              <div className="setting-copy">
-                <span className="setting-name">Daily reminder time</span>
-                <span className="setting-desc">
-                  A saved reminder preference for your daily practice.
-                </span>
-              </div>
-              <input
-                type="time"
-                className="settings-time-input"
-                value={draft.reminderTime}
-                onChange={(event) =>
-                  updateDraft({ reminderTime: event.target.value })
-                }
-                aria-label="Daily reminder time"
-              />
             </div>
 
             <p className="settings-note">
               <Info size={14} aria-hidden="true" />
-              This preference controls the in-app notification panel. The
-              prototype does not send email, push notifications or scheduled
-              browser reminders.
+              All notification preferences are stored per account. Existing
+              notifications stay in your inbox when a category is turned off;
+              only new notifications of that type are suppressed. Reminders are
+              generated in-app and never sent by an external provider.
             </p>
           </section>
 
